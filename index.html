@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSK MRI Report Template</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Lora and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for Inter font and muted pastel yellow/brown scheme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #8B4513; /* Saddle Brown - main background */
+            color: #4A4A4A; /* Dark Gray for general text */
+        }
+        .container {
+            max-width: 1200px; /* Increased max-width for two columns */
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #FFFFFF; /* Pure White for content area */
+            border-radius: 0.75rem; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Softer shadow */
+            display: flex; /* Flexbox for side-by-side layout */
+            flex-direction: column; /* Default to column on small screens */
+            gap: 2rem; /* Gap between columns/sections */
+        }
+        @media (min-width: 1024px) { /* Apply row direction on larger screens */
+            .container {
+                flex-direction: row;
+                align-items: flex-start; /* Align items to the top for sticky positioning */
+            }
+        }
+
+        .input-form-column {
+            flex: 1.2; /* Decreased width for input form */
+        }
+        .report-output-column {
+            flex-shrink: 0; /* Prevents shrinking */
+            width: 100%; /* Full width on small screens */
+            flex: 1.8; /* Increased width for report output */
+            display: flex; /* Enable flex for inner content */
+            flex-direction: column;
+            
+            /* Sticky positioning for the report output column on large screens */
+            @media (min-width: 1024px) {
+                position: sticky;
+                top: 2rem; /* Stays 2rem from the top of the viewport */
+                max-height: calc(100vh - 4rem); /* Adjust height to fit viewport, considering top/bottom margins */
+            }
+        }
+
+        .section-title {
+            border-bottom: 2px solid #D2B48C; /* Tan - soft brown border */
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            color: #CD853F; /* Peru - muted orange-brown */
+        }
+        .subsection-title {
+            color: #A0522D; /* Sienna - slightly darker muted brown */
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem; /* Increased space between rows */
+            line-height: 1.4; /* Slightly increased line height for readability */
+            font-size: 0.875rem; /* text-sm */
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"],
+        .checkbox-group input[type="radio"] { /* Added radio buttons here */
+            margin-right: 0.5rem;
+            border-radius: 0.25rem; /* Slightly rounded checkboxes */
+            accent-color: #DEB887; /* BurlyWood - light brown accent */
+            /* Increased size for checkboxes and radio buttons */
+            width: 1.15em; /* Slightly larger width */
+            height: 1.15em; /* Slightly larger height */
+        }
+        /* General input styling, removed width: 100% */
+        input[type="text"], input[type="date"] {
+            padding: 0.5rem;
+            border: 1px solid #D3D3D3; /* Light Gray border */
+            border-radius: 0.375rem; /* Rounded corners */
+            background-color: #FFFFFF; /* White background */
+            color: #374151; /* Darker text */
+        }
+        textarea {
+            resize: vertical; /* Allow vertical resizing for textarea */
+            min-height: 80px; /* Min height for textarea */
+            width: 100%; /* Textarea retains full width */
+            padding: 0.5rem;
+            border: 1px solid #D3D3D3;
+            border-radius: 0.375rem;
+            background-color: #FFFFFF;
+            color: #374151;
+        }
+
+        /* Specific height for history textarea */
+        #history {
+            min-height: 120px; /* Increased height for history */
+        }
+
+        /* Style for the generated report area */
+        #reportOutput {
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            word-wrap: break-word; /* Break long words */
+            background-color: #FDF5E6; /* Old Lace - matching patient info background */
+            border: 1px solid #D3D3D3; /* Light Gray for report border */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Lora', serif; /* Lora font */
+            font-size: 0.9rem;
+            font-weight: 400; /* Normal font weight */
+            color: #374151; /* Darker text for readability */
+            flex-grow: 1; /* Allows it to fill available height within its sticky column */
+            overflow-y: auto; /* Enable vertical scrolling for its content */
+            max-height: 500px; /* Decreased space for the report output */
+        }
+        /* Styling for specific section backgrounds */
+        .bg-patient-info {
+            background-color: #FDF5E6; /* Old Lace - very light cream */
+        }
+        .bg-findings-section {
+            background-color: #FFF8DC; /* Cornsilk - very pale yellow */
+            font-family: 'Lato', sans-serif; /* Lato font for findings input sections */
+        }
+        /* Left border for sub-sections */
+        .border-l-pastel {
+            border-left: 2px solid #DEB887; /* BurlyWood - light brown */
+        }
+        /* Button styles */
+        .btn {
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            margin-top: 0.5rem; /* Added margin for spacing */
+            margin-bottom: 0.5rem;
+        }
+        .btn-generate {
+            background-color: #BDB76B; /* Dark Khaki - muted yellow-brown */
+            color: #4A4A4A; /* Dark Gray text */
+        }
+        .btn-generate:hover {
+            background-color: #A29E5A; /* Darker Khaki on hover */
+            transform: scale(1.05);
+        }
+        .btn-clear {
+            background-color: #BC8F8F; /* Rosy Brown - muted red-brown */
+            color: #4A4A4A; /* Dark Gray text */
+        }
+        .btn-clear:hover {
+            background-color: #A07F7F; /* Darker Rosy Brown on hover */
+        }
+        .btn-save {
+            background-color: #8FBC8F; /* Dark Sea Green */
+            color: #4A4A4A;
+        }
+        .btn-save:hover {
+            background-color: #7AA27A;
+        }
+        .btn-new {
+            background-color: #ADD8E6; /* Light Blue */
+            color: #4A4A4A;
+        }
+        .btn-new:hover {
+            background-color: #9AC0CD;
+        }
+        .btn-delete {
+            background-color: #F08080; /* Light Coral */
+            color: #4A4A4A;
+        }
+        .btn-delete:hover {
+            background-color: #D66060;
+        }
+        .btn-undo {
+            background-color: #D2B48C; /* Tan */
+            color: #4A4A4A;
+        }
+        .btn-undo:hover {
+            background-color: #C0A078; /* Darker Tan */
+        }
+        .case-button {
+            background-color: #E0E0E0; /* Light Gray */
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            border: 1px solid #CCC;
+        }
+        .case-button:hover {
+            background-color: #D0D0D0;
+        }
+        .case-button.active {
+            background-color: #DEB887; /* BurlyWood */
+            font-weight: bold;
+            border-color: #CD853F;
+        }
+
+        /* Styles for tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #D2B48C;
+        }
+        .tab-button {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #A0522D;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+        }
+        .tab-button.active {
+            border-bottom-color: #CD853F;
+            color: #8B4513;
+        }
+        .tab-button:hover:not(.active) {
+            background-color: #FDF5E6;
+        }
+        .report-form-section {
+            display: none; /* Hidden by default */
+        }
+        .report-form-section.active {
+            display: block; /* Shown when active */
+        }
+
+        /* Custom Alert/Modal styles */
+        #customAlert {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        #customAlert > div {
+            background-color: #FFFFFF;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        #customAlertMessage {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #374151;
+        }
+        #customAlertCloseBtn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            background-color: #CD853F; /* Peru */
+            color: #FFFFFF;
+            border: none;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        #customAlertCloseBtn:hover {
+            background-color: #A0522D; /* Sienna */
+        }
+
+        /* Smaller copy button */
+        #copyReportBtn {
+            padding: 0.5rem 1rem; /* Smaller padding */
+            font-size: 0.875rem; /* Smaller font size */
+            background-color: #A0522D; /* Sienna brown */
+            color: #FFFFFF; /* White text */
+        }
+        #copyReportBtn:hover {
+            background-color: #8B4513; /* Darker brown on hover */
+            transform: scale(1.02); /* Slightly less scale on hover */
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container">
+        <!-- Left Column: Input Form -->
+        <div class="input-form-column">
+            <h1 class="text-3xl font-bold text-center mb-6 text-saddle-brown">MSK MRI Report Generator</h1>
+
+            <!-- Case Management Section -->
+            <div class="mb-8 p-4 bg-patient-info rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold section-title">Case Management</h2>
+                <div class="flex flex-wrap gap-2 mb-4" id="caseList">
+                    <!-- Case buttons will be rendered here -->
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="newReportBtn" class="btn btn-new">New Report</button>
+                    <button id="saveReportBtn" class="btn btn-save">Save Current Report</button>
+                    <button id="deleteReportBtn" class="btn btn-delete">Delete Current Report</button>
+                    <button id="clearFormBtn" class="btn btn-clear">Clear All Fields</button> <!-- Moved to top -->
+                    <button id="undoBtn" class="btn btn-undo">Undo</button> <!-- New Undo button -->
+                </div>
+            </div>
+
+            <!-- Tabs for Report Types -->
+            <div class="tabs" id="reportTabs">
+                <button class="tab-button active" data-tab="shoulder">Shoulder MRI</button>
+                <button class="tab-button" data-tab="knee">Knee MRI</button>
+            </div>
+
+            <!-- Patient Information Section (Common to all templates) -->
+            <div class="mb-8 p-4 bg-patient-info rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold section-title">Patient Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="examDate" class="block text-sm font-medium text-gray-700 mb-1">Exam Date:</label>
+                        <input type="date" id="examDate" class="w-fit">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Exam Type:</label>
+                        <div class="flex items-center space-x-4">
+                            <span id="examTypePrefix">MRI of the</span>
+                            <label><input type="checkbox" name="bodyPartSide" value="Left" id="bodyPartLeft"> Left</label>
+                            <label><input type="checkbox" name="bodyPartSide" value="Right" id="bodyPartRight"> Right</label>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="history" class="block text-sm font-medium text-gray-700 mb-1">History:</label>
+                        <textarea id="history" placeholder="Enter patient history..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shoulder MRI Template -->
+            <div id="shoulderForm" class="report-form-section active">
+                <!-- Technique Section - Shoulder -->
+                <div class="mb-8 p-4 bg-findings-section rounded-lg shadow-sm">
+                    <h2 class="text-xl font-semibold section-title">Technique - Shoulder</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Axial -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Axial</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="techniqueAxial" value="T2W/FFE"> T2W/FFE</label>
+                                <label><input type="checkbox" name="techniqueAxial" value="PDW/FS"> PDW/FS</label>
+                                <label><input type="checkbox" name="techniqueAxial" value="PDW/FS with internal rotation"> PDW/FS with internal rotation</label>
+                                <label><input type="checkbox" name="techniqueAxial" value="3D WET"> 3D WET</label>
+                            </div>
+                            <label for="techniqueAxialNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="techniqueAxialNotes" rows="2"></textarea>
+                        </div>
+                        <!-- Coronal oblique -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Coronal oblique</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="techniqueCoronal" value="T2W/FS"> T2W/FS</label>
+                                <label><input type="checkbox" name="techniqueCoronal" value="PDW"> PDW</label>
+                            </div>
+                            <label for="techniqueCoronalNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="techniqueCoronalNotes" rows="2"></textarea>
+                        </div>
+                        <!-- Sagittal oblique -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Sagittal oblique</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="techniqueSagittal" value="T2W/FS"> T2W/FS</label>
+                                <label><input type="checkbox" name="techniqueSagittal" value="PDW"> PDW</label>
+                            </div>
+                            <label for="techniqueSagittalNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="techniqueSagittalNotes" rows="2"></textarea>
+                        </div>
+                        <!-- Acromion view -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Acromion view</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="techniqueAcromion" value="PDW"> PDW</label>
+                            </div>
+                            <label for="techniqueAcromionNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="techniqueAcromionNotes" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Section - Shoulder -->
+                <div class="mb-8 p-4 bg-findings-section rounded-lg shadow-sm">
+                    <h2 class="text-xl font-semibold section-title">Comparison - Shoulder</h2>
+                    <label for="comparisonDateShoulder" class="block text-sm font-medium text-gray-700 mb-1">Previous MRI shoulder on:</label>
+                    <input type="date" id="comparisonDateShoulder" class="w-fit">
+                </div>
+
+                <!-- Findings Section - Shoulder -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold section-title mb-4">Findings - Shoulder</h2>
+
+                    <div class="mb-6 p-4 bg-findings-section rounded-lg shadow-sm">
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Shoulder</h3>
+
+                        <!-- Rotator Cuff Tendons -->
+                        <div class="mb-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#ROTATOR CUFF AND ASSOCIATED TENDONS:</p>
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Supraspinatus Tendon</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="supraspinatus" value="Normal SI without tendon disruption"> Normal SI without tendon disruption</label>
+                                <label><input type="checkbox" name="supraspinatus" value="Tendinopathy"> Tendinopathy</label>
+                                <label><input type="checkbox" name="supraspinatus" value="Partial tear, Grade I"> Partial tear, Grade I</label>
+                                <label><input type="checkbox" name="supraspinatus" value="Partial tear, Grade II"> Partial tear, Grade II</label>
+                                <label><input type="checkbox" name="supraspinatus" value="Partial tear, Grade III"> Partial tear, Grade III</label>
+                                <label><input type="checkbox" name="supraspinatus" value="Full thickness tear"> Full thickness tear</label>
+                                <label><input type="checkbox" name="supraspinatus" value="Post-operative change"> Post-operative change</label>
+                            </div>
+                            <div class="mt-2 pl-4 border-l border-gray-300">
+                                <p class="text-sm font-medium text-gray-600 mb-1">Tear Type (if applicable):</p>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-3 gap-y-1">
+                                    <label><input type="checkbox" name="supraspinatusTearType" value="Intrasubstance"> Intrasubstance</label>
+                                    <label><input type="checkbox" name="supraspinatusTearType" value="Bursal surface"> Bursal surface</label>
+                                    <label><input type="checkbox" name="supraspinatusTearType" value="Articular surface"> Articular surface</label>
+                                </div>
+                            </div>
+                            <label for="supraspinatusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="supraspinatusNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Infraspinatus Tendon</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="infraspinatus" value="Normal SI without tendon disruption"> Normal SI without tendon disruption</label>
+                                <label><input type="checkbox" name="infraspinatus" value="Tendinopathy"> Tendinopathy</label>
+                                <label><input type="checkbox" name="infraspinatus" value="Partial tear, Grade I"> Partial tear, Grade I</label>
+                                <label><input type="checkbox" name="infraspinatus" value="Partial tear, Grade II"> Partial tear, Grade II</label>
+                                <label><input type="checkbox" name="infraspinatus" value="Partial tear, Grade III"> Partial tear, Grade III</label>
+                                <label><input type="checkbox" name="infraspinatus" value="Full thickness tear"> Full thickness tear</label>
+                            </div>
+                            <div class="mt-2 pl-4 border-l border-gray-300">
+                                <p class="text-sm font-medium text-gray-600 mb-1">Tear Type (if applicable):</p>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-3 gap-y-1">
+                                    <label><input type="checkbox" name="infraspinatusTearType" value="Intrasubstance"> Intrasubstance</label>
+                                    <label><input type="checkbox" name="infraspinatusTearType" value="Bursal surface"> Bursal surface</label>
+                                    <label><input type="checkbox" name="infraspinatusTearType" value="Articular surface"> Articular surface</label>
+                                </div>
+                            </div>
+                            <label for="infraspinatusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="infraspinatusNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Subscapularis Tendon</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="subscapularis" value="Normal SI without tendon disruption"> Normal SI without tendon disruption</label>
+                                <label><input type="checkbox" name="subscapularis" value="Tendinopathy"> Tendinopathy</label>
+                                <label><input type="checkbox" name="subscapularis" value="Partial tear, Grade I"> Partial tear, Grade I</label>
+                                <label><input type="checkbox" name="subscapularis" value="Partial tear, Grade II"> Partial tear, Grade II</label>
+                                <label><input type="checkbox" name="subscapularis" value="Partial tear, Grade III"> Partial tear, Grade III</label>
+                                <label><input type="checkbox" name="subscapularis" value="Full thickness tear"> Full thickness tear</label>
+                            </div>
+                            <div class="mt-2 pl-4 border-l border-gray-300">
+                                <p class="text-sm font-medium text-gray-600 mb-1">Tear Type (if applicable):</p>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-3 gap-y-1">
+                                    <label><input type="checkbox" name="subscapularisTearType" value="Intrasubstance"> Intrasubstance</label>
+                                    <label><input type="checkbox" name="subscapularisTearType" value="Bursal surface"> Bursal surface</label>
+                                    <label><input type="checkbox" name="subscapularisTearType" value="Articular surface"> Articular surface</label>
+                                </div>
+                            </div>
+                            <label for="subscapularisNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="subscapularisNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Teres Minor Tendon</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="teresMinor" value="Normal SI without tendon disruption"> Normal SI without tendon disruption</label>
+                                <label><input type="checkbox" name="teresMinor" value="Tendinopathy"> Tendinopathy</label>
+                                <label><input type="checkbox" name="teresMinor" value="Tear"> Tear</label>
+                            </div>
+                            <label for="teresMinorNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="teresMinorNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Long Head of Biceps Tendon</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="biceps" value="Normal SI without tendon disruption"> Normal SI without tendon disruption</label>
+                                <label><input type="checkbox" name="biceps" value="Tendinopathy"> Tendinopathy</label>
+                                <label><input type="checkbox" name="biceps" value="Tenosynovitis"> Tenosynovitis</label>
+                                <label><input type="checkbox" name="biceps" value="Partial tear"> Partial tear</label>
+                                <label><input type="checkbox" name="biceps" value="Complete tear"> Complete tear</label>
+                                <label><input type="checkbox" name="biceps" value="Subluxation/Dislocation"> Subluxation/Dislocation</label>
+                            </div>
+                            <label for="bicepsNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="bicepsNotes"></textarea>
+                        </div>
+
+                        <!-- Glenoid Labrum -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#GLENOID LABRUM:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="shoulderLabrum" value="Intact glenoid labrum"> Intact glenoid labrum</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="Degenerative changes of the labrum"> Degenerative changes of the labrum</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="SLAP tear (Type I)"> SLAP tear (Type I)</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="SLAP tear (Type II)"> SLAP tear (Type II)</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="SLAP tear (Type III)"> SLAP tear (Type III)</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="SLAP tear (Type IV)"> SLAP tear (Type IV)</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="Anterior-inferior labral tear (Bankart lesion)"> Anterior-inferior labral tear (Bankart lesion)</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="Posterior labral tear"> Posterior labral tear</label>
+                                <label><input type="checkbox" name="shoulderLabrum" value="Ossification of labrum"> Ossification of labrum</label>
+                            </div>
+                            <label for="shoulderLabrumNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="shoulderLabrumNotes"></textarea>
+                        </div>
+
+                        <!-- Musculature -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#MUSCULATURE:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="shoulderMusculature" value="No atrophy/fatty infiltration"> No atrophy/fatty infiltration</label>
+                                <label><input type="checkbox" name="shoulderMusculature" value="Atrophy present"> Atrophy present</label>
+                            </div>
+                            <h5 class="text-sm font-medium text-gray-600 mb-1 mt-3">Fatty Infiltration (Goutallier Classification):</h5>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="fattyInfiltration" value="Grade 0 (No fatty infiltration)"> Grade 0 (No fatty infiltration)</label>
+                                <label><input type="checkbox" name="fattyInfiltration" value="Grade 1 (Some fatty streaks)"> Grade 1 (Some fatty streaks)</label>
+                                <label><input type="checkbox" name="fattyInfiltration" value="Grade 2 (Less muscle than fat)"> Grade 2 (Less muscle than fat)</label>
+                                <label><input type="checkbox" name="fattyInfiltration" value="Grade 3 (Equal muscle and fat)"> Grade 3 (Equal muscle and fat)</label>
+                                <label><input type="checkbox" name="fattyInfiltration" value="Grade 4 (More fat than muscle)"> Grade 4 (More fat than muscle)</label>
+                            </div>
+                            <label for="shoulderMusculatureNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="shoulderMusculatureNotes"></textarea>
+                        </div>
+
+                        <!-- Glenohumeral Joint and Capsulo-Labral Structure -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#GLENOHUMERAL JOINT AND CAPSULO-LABRAL STRUCTURE:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="No significant joint effusion"> No significant joint effusion</label>
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="Mild joint effusion"> Mild joint effusion</label>
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="Moderate joint effusion"> Moderate joint effusion</label>
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="Synovial proliferation/Synovitis"> Synovial proliferation/Synovitis</label>
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="No focal articular cartilage defect"> No focal articular cartilage defect</label>
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="Articular cartilage loss/degeneration"> Articular cartilage loss/degeneration</label>
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="Capsulitis/Adhesive capsulitis findings"> Capsulitis/Adhesive capsulitis findings</label>
+                                <label><input type="checkbox" name="shoulderGlenohumeral" value="Thickening/increased signal of inferior glenohumeral ligament (IGHL)"> Thickening/increased signal of inferior glenohumeral ligament (IGHL)</label>
+                            </div>
+                            <label for="shoulderGlenohumeralNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="shoulderGlenohumeralNotes"></textarea>
+                        </div>
+
+                        <!-- ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="shoulderACJoint" value="Normal AC joint"> Normal AC joint</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="Degenerative changes/Osteoarthritis"> Degenerative changes/Osteoarthritis</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="AC joint sprain, Grade I"> AC joint sprain, Grade I</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="AC joint sprain, Grade II"> AC joint sprain, Grade II</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="AC joint sprain, Grade III"> AC joint sprain, Grade III</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="Curved type acromion"> Curved type acromion</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="Coracoacromial ligament unremarkable"> Coracoacromial ligament unremarkable</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="Coracoclavicular ligament unremarkable"> Coracoclavicular ligament unremarkable</label>
+                                <label><input type="checkbox" name="shoulderACJoint" value="S/P subacromial decompression"> S/P subacromial decompression</label>
+                            </div>
+                            <label for="shoulderACJointNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="shoulderACJointNotes"></textarea>
+                        </div>
+
+                        <!-- OTHER OSSEOUS STRUCTURES -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#OTHER OSSEOUS STRUCTURES:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="shoulderOsseous" value="No acute fracture"> No acute fracture</label>
+                                <label><input type="checkbox" name="shoulderOsseous" value="Stress fracture"> Stress fracture</label>
+                                <label><input type="checkbox" name="shoulderOsseous" value="Bone contusion/marrow edema"> Bone contusion/marrow edema</label>
+                                <label><input type="checkbox" name="shoulderOsseous" value="Cysts"> Cysts</label>
+                                <label><input type="checkbox" name="shoulderOsseous" value="Hill-Sachs deformity"> Hill-Sachs deformity</label>
+                                <label><input type="checkbox" name="shoulderOsseous" value="Osseous Bankart lesion"> Osseous Bankart lesion</label>
+                                <label><input type="checkbox" name="shoulderOsseous" value="Normal bone marrow SI"> Normal bone marrow SI</label>
+                            </div>
+                            <label for="shoulderOsseousNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="shoulderOsseousNotes"></textarea>
+                        </div>
+
+                        <!-- BURSAE -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#BURSAE:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="shoulderBursae" value="No significant bursal fluid"> No significant bursal fluid</label>
+                                <label><input type="checkbox" name="shoulderBursae" value="Subacromial-subdeltoid bursitis (fluid/synovial proliferation)"> Subacromial-subdeltoid bursitis (fluid/synovial proliferation)</label>
+                                <label><input type="checkbox" name="shoulderBursae" value="Other bursitis"> Other bursitis</label>
+                            </div>
+                            <label for="shoulderBursaeNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="shoulderBursaeNotes"></textarea>
+                        </div>
+
+                        <!-- NEUROVASCULAR BUNDLES -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#NEUROVASCULAR BUNDLES:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="shoulderNeurovascular" value="No compressive mass along visualized neurovascular bundles"> No compressive mass along visualized neurovascular bundles</label>
+                                <label><input type="checkbox" name="shoulderNeurovascular" value="Compressive mass noted"> Compressive mass noted</label>
+                            </div>
+                            <label for="shoulderNeurovascularNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="shoulderNeurovascularNotes"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Knee MRI Template -->
+            <div id="kneeForm" class="report-form-section">
+                <!-- Technique Section - Knee -->
+                <div class="mb-8 p-4 bg-findings-section rounded-lg shadow-sm">
+                    <h2 class="text-xl font-semibold section-title">Technique - Knee</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Axial -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Axial</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="kneeTechniqueAxial" value="PDW/FS"> PDW/FS</label>
+                                <label><input type="checkbox" name="kneeTechniqueAxial" value="T2W"> T2W</label>
+                                <label><input type="checkbox" name="kneeTechniqueAxial" value="3D VIBE"> 3D VIBE</label>
+                            </div>
+                            <label for="kneeTechniqueAxialNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="kneeTechniqueAxialNotes" rows="2"></textarea>
+                        </div>
+                        <!-- Sagittal -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Sagittal</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="kneeTechniqueSagittal" value="PDW"> PDW</label>
+                                <label><input type="checkbox" name="kneeTechniqueSagittal" value="T2W"> T2W</label>
+                                <label><input type="checkbox" name="kneeTechniqueSagittal" value="3D VIBE"> 3D VIBE</label>
+                            </div>
+                            <label for="kneeTechniqueSagittalNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="kneeTechniqueSagittalNotes" rows="2"></textarea>
+                        </div>
+                        <!-- Coronal -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Coronal</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="kneeTechniqueCoronal" value="T1W"> T1W</label>
+                                <label><input type="checkbox" name="kneeTechniqueCoronal" value="PDW/FS"> PDW/FS</label>
+                            </div>
+                            <label for="kneeTechniqueCoronalNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="kneeTechniqueCoronalNotes" rows="2"></textarea>
+                        </div>
+                        <!-- Oblique along ACL -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Oblique along ACL</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="kneeTechniqueObliqueACL" value="T2W"> T2W</label>
+                                <label><input type="checkbox" name="kneeTechniqueObliqueACL" value="T2W FS"> T2W FS</label>
+                            </div>
+                            <label for="kneeTechniqueObliqueACLNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="kneeTechniqueObliqueACLNotes" rows="2"></textarea>
+                        </div>
+                        <!-- Oblique perpendicular to ACL -->
+                        <div class="pl-4 border-l-pastel">
+                            <h4 class="text-md font-medium text-gray-700 mb-2">Oblique perpendicular to ACL</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="kneeTechniqueObliquePerpACL" value="PDW"> PDW</label>
+                            </div>
+                            <label for="kneeTechniqueObliquePerpACLNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
+                            <textarea id="kneeTechniqueObliquePerpACLNotes" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Section - Knee -->
+                <div class="mb-8 p-4 bg-findings-section rounded-lg shadow-sm">
+                    <h2 class="text-xl font-semibold section-title">Comparison - Knee</h2>
+                    <label for="comparisonDateKnee" class="block text-sm font-medium text-gray-700 mb-1">Previous MRI knee on:</label>
+                    <input type="date" id="comparisonDateKnee" class="w-fit">
+                </div>
+
+                <!-- Findings Section - Knee -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold section-title mb-4">Findings - Knee</h2>
+
+                    <div class="mb-6 p-4 bg-findings-section rounded-lg shadow-sm">
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Knee</h3>
+
+                        <!-- Menisci -->
+                        <div class="mb-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#MENISCI:</p>
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Medial Meniscus</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="medialMeniscus" value="Normal morphology and signal intensity"> Normal morphology and signal intensity</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Degenerative changes (Grade I)"> Degenerative changes (Grade I)</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Degenerative changes (Grade II)"> Degenerative changes (Grade II)</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Tear - Horizontal"> Tear - Horizontal</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Tear - Vertical/Longitudinal"> Tear - Vertical/Longitudinal</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Tear - Radial"> Tear - Radial</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Tear - Complex"> Tear - Complex</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Tear - Bucket Handle"> Tear - Bucket Handle</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Tear - Flap"> Tear - Flap</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Tear - Root"> Tear - Root</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Extrusion"> Extrusion</label>
+                                <label><input type="checkbox" name="medialMeniscus" value="Post-surgical changes"> Post-surgical changes</label>
+                            </div>
+                            <div class="mt-2 pl-4 border-l border-gray-300">
+                                <p class="text-sm font-medium text-gray-600 mb-1">Location (if applicable):</p>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-3 gap-y-1">
+                                    <label><input type="checkbox" name="medialMeniscusLocation" value="Anterior Horn"> Anterior Horn</label>
+                                    <label><input type="checkbox" name="medialMeniscusLocation" value="Body"> Body</label>
+                                    <label><input type="checkbox" name="medialMeniscusLocation" value="Posterior Horn"> Posterior Horn</label>
+                                    <label><input type="checkbox" name="medialMeniscusLocation" value="Posterior Root"> Posterior Root</label>
+                                </div>
+                                <p class="text-sm font-medium text-gray-600 mb-1 mt-2">Zone (if applicable):</p>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-3 gap-y-1">
+                                    <label><input type="checkbox" name="medialMeniscusZone" value="Red-Red Zone"> Red-Red Zone</label>
+                                    <label><input type="checkbox" name="medialMeniscusZone" value="Red-White Zone"> Red-White Zone</label>
+                                    <label><input type="checkbox" name="medialMeniscusZone" value="White-White Zone"> White-White Zone</label>
+                                </div>
+                            </div>
+                            <label for="medialMeniscusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="medialMeniscusNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Lateral Meniscus</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="lateralMeniscus" value="Normal morphology and signal intensity"> Normal morphology and signal intensity</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Degenerative changes (Grade I)"> Degenerative changes (Grade I)</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Degenerative changes (Grade II)"> Degenerative changes (Grade II)</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Tear - Horizontal"> Tear - Horizontal</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Tear - Vertical/Longitudinal"> Tear - Vertical/Longitudinal</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Tear - Radial"> Tear - Radial</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Tear - Complex"> Tear - Complex</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Tear - Bucket Handle"> Tear - Bucket Handle</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Tear - Flap"> Tear - Flap</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Tear - Root"> Tear - Root</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Extrusion"> Extrusion</label>
+                                <label><input type="checkbox" name="lateralMeniscus" value="Post-surgical changes"> Post-surgical changes</label>
+                            </div>
+                            <div class="mt-2 pl-4 border-l border-gray-300">
+                                <p class="text-sm font-medium text-gray-600 mb-1">Location (if applicable):</p>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-3 gap-y-1">
+                                    <label><input type="checkbox" name="lateralMeniscusLocation" value="Anterior Horn"> Anterior Horn</label>
+                                    <label><input type="checkbox" name="lateralMeniscusLocation" value="Body"> Body</label>
+                                    <label><input type="checkbox" name="lateralMeniscusLocation" value="Posterior Horn"> Posterior Horn</label>
+                                </div>
+                                <p class="text-sm font-medium text-gray-600 mb-1 mt-2">Zone (if applicable):</p>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-3 gap-y-1">
+                                    <label><input type="checkbox" name="lateralMeniscusZone" value="Red-Red Zone"> Red-Red Zone</label>
+                                    <label><input type="checkbox" name="lateralMeniscusZone" value="Red-White Zone"> Red-White Zone</label>
+                                    <label><input type="checkbox" name="lateralMeniscusZone" value="White-White Zone"> White-White Zone</label>
+                                </div>
+                            </div>
+                            <label for="lateralMeniscusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="lateralMeniscusNotes"></textarea>
+                        </div>
+
+                        <!-- Ligaments -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#ANTERIOR/POSTERIOR CRUCIATE AND COLLATERAL LIGAMENTS:</p>
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Anterior Cruciate Ligament (ACL)</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="acl" value="Normal course and SI"> Normal course and SI</label>
+                                <label><input type="checkbox" name="acl" value="Sprain (Grade I)"> Sprain (Grade I)</label>
+                                <label><input type="checkbox" name="acl" value="Sprain (Grade II)"> Sprain (Grade II)</label>
+                                <label><input type="checkbox" name="acl" value="Complete tear"> Complete tear</label>
+                                <label><input type="checkbox" name="acl" value="Post-surgical changes"> Post-surgical changes</label>
+                            </div>
+                            <label for="aclNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="aclNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Posterior Cruciate Ligament (PCL)</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="pcl" value="Normal course and SI"> Normal course and SI</label>
+                                <label><input type="checkbox" name="pcl" value="Sprain (Grade I)"> Sprain (Grade I)</label>
+                                <label><input type="checkbox" name="pcl" value="Sprain (Grade II)"> Sprain (Grade II)</label>
+                                <label><input type="checkbox" name="pcl" value="Complete tear"> Complete tear</label>
+                                <label><input type="checkbox" name="pcl" value="Post-surgical changes"> Post-surgical changes</label>
+                            </div>
+                            <label for="pclNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="pclNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Medial Collateral Ligament (MCL)</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="mcl" value="Normal course and SI"> Normal course and SI</label>
+                                <label><input type="checkbox" name="mcl" value="Sprain (Grade I)"> Sprain (Grade I)</label>
+                                <label><input type="checkbox" name="mcl" value="Sprain (Grade II)"> Sprain (Grade II)</label>
+                                <label><input type="checkbox" name="mcl" value="Complete tear"> Complete tear</label>
+                            </div>
+                            <label for="mclNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="mclNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Fibular Collateral Ligament (FCL) / Lateral Collateral Ligament (LCL)</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="lcl" value="Normal course and SI"> Normal course and SI</label>
+                                <label><input type="checkbox" name="lcl" value="Sprain (Grade I)"> Sprain (Grade I)</label>
+                                <label><input type="checkbox" name="lcl" value="Sprain (Grade II)"> Sprain (Grade II)</label>
+                                <label><input type="checkbox" name="lcl" value="Complete tear"> Complete tear</label>
+                            </div>
+                            <label for="lclNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="lclNotes"></textarea>
+                        </div>
+
+                        <!-- Extensor Mechanism -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#EXTENSOR MECHANISM:</p>
+                            <!-- Quadriceps Tendon moved to Other Muscles and Tendons -->
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Patellar Tendon</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="patellarTendon" value="Normal course and SI"> Normal course and SI</label>
+                                <label><input type="checkbox" name="patellarTendon" value="Tendinopathy"> Tendinopathy</label>
+                                <label><input type="checkbox" name="patellarTendon" value="Partial tear"> Partial tear</label>
+                                <label><input type="checkbox" name="patellarTendon" value="Complete tear"> Complete tear</label>
+                                <label><input type="checkbox" name="patellarTendon" value="Other"> Other</label>
+                            </div>
+                            <label for="patellarTendonNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="patellarTendonNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Patellar Retinaculum / Medial Patellofemoral Ligament (MPFL)</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="patellarRetinaculum" value="Normal course and SI"> Normal course and SI</label>
+                                <label><input type="checkbox" name="patellarRetinaculum" value="Tear - Medial Retinaculum"> Tear - Medial Retinaculum</label>
+                                <label><input type="checkbox" name="patellarRetinaculum" value="Tear - Lateral Retinaculum"> Tear - Lateral Retinaculum</label>
+                                <label><input type="checkbox" name="patellarRetinaculum" value="Tear - MPFL"> Tear - MPFL</label>
+                                <label><input type="checkbox" name="patellarRetinaculum" value="Other"> Other</label>
+                            </div>
+                            <label for="patellarRetinaculumNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="patellarRetinaculumNotes"></textarea>
+                        </div>
+
+                        <!-- Other Muscles and Tendons -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#MUSCLES AND TENDONS (OTHER):</p>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Overall Muscle/Tendon Status:</label>
+                                <div class="flex space-x-4">
+                                    <label><input type="radio" name="overallMuscleStatus" value="Normal" id="overallMuscleStatusNormal"> Normal</label>
+                                    <label><input type="radio" name="overallMuscleStatus" value="Abnormal" id="overallMuscleStatusAbnormal"> Abnormal</label>
+                                </div>
+                            </div>
+
+                            <div id="individualMuscleFindings" class="hidden">
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Quadriceps Tendon</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="quadricepsTendon" value="Normal course and SI"> Normal course and SI</label>
+                                    <label><input type="checkbox" name="quadricepsTendon" value="Tendinopathy"> Tendinopathy</label>
+                                    <label><input type="checkbox" name="quadricepsTendon" value="Partial tear"> Partial tear</label>
+                                    <label><input type="checkbox" name="quadricepsTendon" value="Complete tear"> Complete tear</label>
+                                    <label><input type="checkbox" name="quadricepsTendon" value="Other"> Other</label>
+                                </div>
+                                <label for="quadricepsTendonNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="quadricepsTendonNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Iliotibial Band</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="iliotibialBand" value="Normal course and SI"> Normal course and SI</label>
+                                    <label><input type="checkbox" name="iliotibialBand" value="Tendinopathy/Friction Syndrome"> Tendinopathy/Friction Syndrome</label>
+                                    <label><input type="checkbox" name="iliotibialBand" value="Other"> Other</label>
+                                </div>
+                                <label for="iliotibialBandNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="iliotibialBandNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Popliteus Tendon</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="popliteusTendon" value="Normal course and SI"> Normal course and SI</label>
+                                    <label><input type="checkbox" name="popliteusTendon" value="Tendinopathy"> Tendinopathy</label>
+                                    <label><input type="checkbox" name="popliteusTendon" value="Tear"> Tear</label>
+                                    <label><input type="checkbox" name="popliteusTendon" value="Other"> Other</label>
+                                </div>
+                                <label for="popliteusTendonNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="popliteusTendonNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Long Head of Biceps Femoris Tendon</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="longHeadBicepsFemorisTendon" value="Normal course and SI"> Normal course and SI</label>
+                                    <label><input type="checkbox" name="longHeadBicepsFemorisTendon" value="Tendinopathy"> Tendinopathy</label>
+                                    <label><input type="checkbox" name="longHeadBicepsFemorisTendon" value="Partial tear"> Partial tear</label>
+                                    <label><input type="checkbox" name="longHeadBicepsFemorisTendon" value="Complete tear"> Complete tear</label>
+                                    <label><input type="checkbox" name="longHeadBicepsFemorisTendon" value="Other"> Other</label>
+                                </div>
+                                <label for="longHeadBicepsFemorisTendonNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="longHeadBicepsFemorisTendonNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Semitendinosus Muscle/Tendon</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="semitendinosus" value="Unremarkable"> Unremarkable</label>
+                                    <label><input type="checkbox" name="semitendinosus" value="Strain (Grade I)"> Strain (Grade I)</label>
+                                    <label><input type="checkbox" name="semitendinosus" value="Strain (Grade II)"> Strain (Grade II)</label>
+                                    <label><input type="checkbox" name="semitendinosus" value="Strain (Grade III)"> Strain (Grade III)</label>
+                                    <label><input type="checkbox" name="semitendinosus" value="Tear"> Tear</label>
+                                    <label><input type="checkbox" name="semitendinosus" value="Atrophy"> Atrophy</label>
+                                    <label><input type="checkbox" name="semitendinosus" value="Mass/Lesion"> Mass/Lesion</label>
+                                    <label><input type="checkbox" name="semitendinosus" value="Other"> Other</label>
+                                </div>
+                                <label for="semitendinosusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="semitendinosusNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Sartorius Muscle</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="sartorius" value="Unremarkable"> Unremarkable</label>
+                                    <label><input type="checkbox" name="sartorius" value="Strain (Grade I)"> Strain (Grade I)</label>
+                                    <label><input type="checkbox" name="sartorius" value="Strain (Grade II)"> Strain (Grade II)</label>
+                                    <label><input type="checkbox" name="sartorius" value="Strain (Grade III)"> Strain (Grade III)</label>
+                                    <label><input type="checkbox" name="sartorius" value="Tear"> Tear</label>
+                                    <label><input type="checkbox" name="sartorius" value="Atrophy"> Atrophy</label>
+                                    <label><input type="checkbox" name="sartorius" value="Mass/Lesion"> Mass/Lesion</label>
+                                    <label><input type="checkbox" name="sartorius" value="Other"> Other</label>
+                                </div>
+                                <label for="sartoriusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="sartoriusNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Gracilis Muscle</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="gracilis" value="Unremarkable"> Unremarkable</label>
+                                    <label><input type="checkbox" name="gracilis" value="Strain (Grade I)"> Strain (Grade I)</label>
+                                    <label><input type="checkbox" name="gracilis" value="Strain (Grade II)"> Strain (Grade II)</label>
+                                    <label><input type="checkbox" name="gracilis" value="Strain (Grade III)"> Strain (Grade III)</label>
+                                    <label><input type="checkbox" name="gracilis" value="Tear"> Tear</label>
+                                    <label><input type="checkbox" name="gracilis" value="Atrophy"> Atrophy</label>
+                                    <label><input type="checkbox" name="gracilis" value="Mass/Lesion"> Mass/Lesion</label>
+                                    <label><input type="checkbox" name="gracilis" value="Other"> Other</label>
+                                </div>
+                                <label for="gracilisNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="gracilisNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Medial Head of Gastrocnemius Muscle</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="medialGastrocnemius" value="Unremarkable"> Unremarkable</label>
+                                    <label><input type="checkbox" name="medialGastrocnemius" value="Strain (Grade I)"> Strain (Grade I)</label>
+                                    <label><input type="checkbox" name="medialGastrocnemius" value="Strain (Grade II)"> Strain (Grade II)</label>
+                                    <label><input type="checkbox" name="medialGastrocnemius" value="Strain (Grade III)"> Strain (Grade III)</label>
+                                    <label><input type="checkbox" name="checkbox" name="medialGastrocnemius" value="Tear"> Tear</label>
+                                    <label><input type="checkbox" name="medialGastrocnemius" value="Atrophy"> Atrophy</label>
+                                    <label><input type="checkbox" name="medialGastrocnemius" value="Mass/Lesion"> Mass/Lesion</label>
+                                    <label><input type="checkbox" name="medialGastrocnemius" value="Other"> Other</label>
+                                </div>
+                                <label for="medialGastrocnemiusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="medialGastrocnemiusNotes"></textarea>
+
+                                <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Lateral Head of Gastrocnemius Muscle</h4>
+                                <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Unremarkable"> Unremarkable</label>
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Strain (Grade I)"> Strain (Grade I)</label>
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Strain (Grade II)"> Strain (Grade II)</label>
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Strain (Grade III)"> Strain (Grade III)</label>
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Tear"> Tear</label>
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Atrophy"> Atrophy</label>
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Mass/Lesion"> Mass/Lesion</label>
+                                    <label><input type="checkbox" name="lateralGastrocnemius" value="Other"> Other</label>
+                                </div>
+                                <label for="lateralGastrocnemiusNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                                <textarea id="lateralGastrocnemiusNotes"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Bone and Cartilage -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#BONE AND CARTILAGE:</p>
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Articular Cartilage</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="articularCartilage" value="Cartilage appears intact"> Cartilage appears intact</label>
+                                <label><input type="checkbox" name="articularCartilage" value="Chondromalacia (Grade I)"> Chondromalacia (Grade I)</label>
+                                <label><input type="checkbox" name="articularCartilage" value="Chondromalacia (Grade II)"> Chondromalacia (Grade II)</label>
+                                <label><input type="checkbox" name="articularCartilage" value="Chondromalacia (Grade III)"> Chondromalacia (Grade III)</label>
+                                <label><input type="checkbox" name="articularCartilage" value="Full thickness cartilage loss"> Full thickness cartilage loss</label>
+                                <label><input type="checkbox" name="articularCartilage" value="Osteoarthritis changes"> Osteoarthritis changes</label>
+                                <label><input type="checkbox" name="articularCartilage" value="Other"> Other</label>
+                            </div>
+                            <label for="articularCartilageNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="articularCartilageNotes"></textarea>
+
+                            <h4 class="text-md font-medium text-gray-700 mb-2 mt-3">Bone Marrow / Osseous Structures</h4>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="boneMarrow" value="Normal bone marrow SI"> Normal bone marrow SI</label>
+                                <label><input type="checkbox" name="boneMarrow" value="Bone marrow edema"> Bone marrow edema</label>
+                                <label><input type="checkbox" name="boneMarrow" value="Bone contusion"> Bone contusion</label>
+                                <label><input type="checkbox" name="boneMarrow" value="Subcortical bone cysts"> Subcortical bone cysts</label>
+                                <label><input type="checkbox" name="boneMarrow" value="No demonstrated fracture line"> No demonstrated fracture line</label>
+                                <label><input type="checkbox" name="boneMarrow" value="Fracture line demonstrated"> Fracture line demonstrated</label>
+                                <label><input type="checkbox" name="boneMarrow" value="Other"> Other</label>
+                            </div>
+                            <label for="boneMarrowNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="boneMarrowNotes"></textarea>
+                        </div>
+
+                        <!-- Joint Effusion / Bursae - Knee -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#JOINT EFFUSION / BURSAE:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="No significant joint effusion"> No significant joint effusion</label>
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="Mild joint effusion"> Mild joint effusion</label>
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="Moderate joint effusion"> Moderate joint effusion</label>
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="Large joint effusion"> Large joint effusion</label>
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="Baker's cyst"> Baker's cyst</label>
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="Prepatellar bursitis"> Prepatellar bursitis</label>
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="Pes anserine bursitis"> Pes anserine bursitis</label>
+                                <label><input type="checkbox" name="kneeEffusionBursae" value="Other"> Other</label>
+                            </div>
+                            <label for="kneeEffusionBursaeNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="kneeEffusionBursaeNotes"></textarea>
+                        </div>
+
+                        <!-- Other Findings - Knee -->
+                        <div class="mt-4 pl-4 border-l-pastel">
+                            <p class="subsection-title">#OTHERS:</p>
+                            <div class="checkbox-group grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                                <label><input type="checkbox" name="kneeOtherFindings" value="No evidence of synovitis or synovial proliferation"> No evidence of synovitis or synovial proliferation</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="Synovitis/synovial proliferation present"> Synovitis/synovial proliferation present</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="No medial plica thickening"> No medial plica thickening</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="Medial plica thickening present"> Medial plica thickening present</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="No demonstrable intra articular body"> No demonstrable intra articular body</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="Intra-articular body demonstrated"> Intra-articular body demonstrated</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="Visualized popliteal vessels, tibial nerve and common peroneal nerve are unremarkable"> Visualized popliteal vessels, tibial nerve and common peroneal nerve are unremarkable</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="Compressive mass along neurovascular bundles"> Compressive mass along neurovascular bundles</label>
+                                <label><input type="checkbox" name="kneeOtherFindings" value="Other"> Other</label>
+                            </div>
+                            <label for="kneeOtherFindingsNotes" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Additional Findings:</label>
+                            <textarea id="kneeOtherFindingsNotes"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reminder for Unselected Structures -->
+                <div id="unselectedStructuresReminder" class="mb-6 p-4 bg-gray-100 rounded-lg shadow-sm text-sm text-gray-600">
+                    <!-- Reminder content will be inserted here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Impression Section (Common to all templates) -->
+            <div class="mb-8 p-4 bg-patient-info rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold section-title">Impression</h2>
+                <textarea id="impression" placeholder="Enter your final impression here..."></textarea>
+            </div>
+
+            <!-- Radiologist Signature (Common to all templates) -->
+            <div class="mb-8 p-4 bg-findings-section rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold section-title">Radiologist Signature</h2>
+                <input type="text" id="radiologistName" value="">
+            </div>
+
+            <!-- Buttons (Generate button moved to top of column, Clear at bottom) -->
+            <div class="text-center mb-8">
+                <button id="generateReportBtn" class="btn btn-generate">
+                    Generate Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Report Output -->
+        <div class="report-output-column">
+            <h2 class="text-xl font-semibold section-title mb-4">Generated Report</h2>
+            <div id="reportOutput" class="min-h-[600px] border p-4 rounded-md text-gray-800 overflow-auto">
+                Your generated report will appear here.
+            </div>
+            <button id="copyReportBtn" class="btn btn-save mt-4 w-full">Copy Report to Clipboard</button>
+        </div>
+    </div>
+
+    <!-- Custom Alert/Modal HTML -->
+    <!-- Added inline style="display: none;" for robust initial hiding -->
+    <div id="customAlert" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+            <p id="customAlertMessage" class="text-lg font-semibold mb-4"></p>
+            <button id="customAlertCloseBtn" class="btn">OK</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateReportBtn = document.getElementById('generateReportBtn');
+            const clearFormBtn = document.getElementById('clearFormBtn');
+            const undoBtn = document.getElementById('undoBtn'); // New Undo button
+            const reportOutput = document.getElementById('reportOutput');
+            const impressionOutput = document.getElementById('impression');
+            const saveReportBtn = document.getElementById('saveReportBtn');
+            const newReportBtn = document.getElementById('newReportBtn');
+            const deleteReportBtn = document.getElementById('deleteReportBtn');
+            const caseListDiv = document.getElementById('caseList');
+            const reportTabs = document.getElementById('reportTabs');
+            const examTypePrefix = document.getElementById('examTypePrefix');
+            const bodyPartSideCheckboxes = document.querySelectorAll('input[name="bodyPartSide"]');
+            const copyReportBtn = document.getElementById('copyReportBtn');
+
+            const overallMuscleStatusRadios = document.querySelectorAll('input[name="overallMuscleStatus"]');
+            const individualMuscleFindingsDiv = document.getElementById('individualMuscleFindings');
+            const unselectedStructuresReminder = document.getElementById('unselectedStructuresReminder');
+
+
+            let reports = []; // Array to hold all saved reports
+            let currentReportId = null; // ID of the currently loaded report
+            let currentReportType = 'shoulder'; // Default to shoulder
+            let undoState = null; // Stores the form state for undo functionality
+
+            // Helper function to format date to DD/MM/YYYY
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                const [year, month, day] = dateString.split('-');
+                return `${day}/${month}/${year}`;
+            }
+
+            // Function to get selected checkbox values by name
+            function getSelectedCheckboxes(name) {
+                return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+            }
+
+            // Function to set checkbox state based on saved values
+            function setCheckboxes(name, values) {
+                document.querySelectorAll(`input[name="${name}"]`).forEach(checkbox => {
+                    checkbox.checked = values.includes(checkbox.value);
+                });
+            }
+
+            // Function to handle mutual exclusivity for bodyPartSide checkboxes
+            bodyPartSideCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    if (event.target.checked) {
+                        bodyPartSideCheckboxes.forEach(otherCheckbox => {
+                            if (otherCheckbox !== event.target) {
+                                otherCheckbox.checked = false;
+                            }
+                        });
+                    }
+                    generateReport(); // Real-time update
+                });
+            });
+
+            // Function to handle mutual exclusivity for tendon/meniscus checkboxes
+            function setupExclusiveCheckboxes(groupName, exclusiveValue = null) {
+                const checkboxes = document.querySelectorAll(`input[name="${groupName}"]`);
+                const exclusiveCheckbox = exclusiveValue ? document.querySelector(`input[name="${groupName}"][value="${exclusiveValue}"]`) : null;
+
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', (event) => {
+                        if (exclusiveValue && event.target.value === exclusiveValue && event.target.checked) {
+                            // If exclusive value is checked, uncheck all others
+                            checkboxes.forEach(otherCheckbox => {
+                                if (otherCheckbox !== event.target) {
+                                    otherCheckbox.checked = false;
+                                }
+                            });
+                        } else if (exclusiveValue && event.target.value !== exclusiveValue && event.target.checked) {
+                            // If any other value is checked, uncheck exclusive value
+                            if (exclusiveCheckbox) {
+                                exclusiveCheckbox.checked = false;
+                            }
+                        }
+                        generateReport(); // Real-time update
+                    });
+                });
+            }
+
+            // Setup exclusivity for shoulder tendons
+            setupExclusiveCheckboxes('supraspinatus', 'Normal SI without tendon disruption');
+            setupExclusiveCheckboxes('infraspinatus', 'Normal SI without tendon disruption');
+            setupExclusiveCheckboxes('subscapularis', 'Normal SI without tendon disruption');
+            setupExclusiveCheckboxes('teresMinor', 'Normal SI without tendon disruption');
+            setupExclusiveCheckboxes('biceps', 'Normal SI without tendon disruption');
+            setupExclusiveCheckboxes('shoulderLabrum', 'Intact glenoid labrum');
+            setupExclusiveCheckboxes('shoulderMusculature', 'No atrophy/fatty infiltration');
+            setupExclusiveCheckboxes('fattyInfiltration', 'Grade 0 (No fatty infiltration)');
+            setupExclusiveCheckboxes('shoulderGlenohumeral', 'No significant joint effusion');
+            setupExclusiveCheckboxes('shoulderACJoint', 'Normal AC joint');
+            setupExclusiveCheckboxes('shoulderOsseous', 'No acute fracture');
+            setupExclusiveCheckboxes('shoulderBursae', 'No significant bursal fluid');
+            setupExclusiveCheckboxes('shoulderNeurovascular', 'No compressive mass along visualized neurovascular bundles');
+
+            // Setup exclusivity for knee menisci, ligaments, etc.
+            setupExclusiveCheckboxes('medialMeniscus', 'Normal morphology and signal intensity');
+            setupExclusiveCheckboxes('lateralMeniscus', 'Normal morphology and signal intensity');
+            setupExclusiveCheckboxes('acl', 'Normal course and SI');
+            setupExclusiveCheckboxes('pcl', 'Normal course and SI');
+            setupExclusiveCheckboxes('mcl', 'Normal course and SI');
+            setupExclusiveCheckboxes('lcl', 'Normal course and SI');
+            setupExclusiveCheckboxes('articularCartilage', 'Cartilage appears intact');
+            setupExclusiveCheckboxes('boneMarrow', 'Normal bone marrow SI');
+            setupExclusiveCheckboxes('patellarTendon', 'Normal course and SI');
+            setupExclusiveCheckboxes('patellarRetinaculum', 'Normal course and SI');
+            // New knee muscle/tendon exclusivity
+            setupExclusiveCheckboxes('quadricepsTendon', 'Normal course and SI');
+            setupExclusiveCheckboxes('iliotibialBand', 'Normal course and SI');
+            setupExclusiveCheckboxes('popliteusTendon', 'Normal course and SI');
+            setupExclusiveCheckboxes('longHeadBicepsFemorisTendon', 'Normal course and SI');
+            setupExclusiveCheckboxes('semitendinosus', 'Unremarkable');
+            setupExclusiveCheckboxes('sartorius', 'Unremarkable');
+            setupExclusiveCheckboxes('gracilis', 'Unremarkable');
+            setupExclusiveCheckboxes('medialGastrocnemius', 'Unremarkable');
+            setupExclusiveCheckboxes('lateralGastrocnemius', 'Unremarkable');
+
+            setupExclusiveCheckboxes('kneeEffusionBursae', 'No significant joint effusion');
+            setupExclusiveCheckboxes('kneeOtherFindings', 'No evidence of synovitis or synovial proliferation');
+
+
+            // Add real-time input listeners to trigger report generation
+            document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(element => {
+                element.addEventListener('input', generateReport);
+            });
+            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(element => { // Added radio buttons here
+                element.addEventListener('change', generateReport);
+            });
+
+            // Tab switching logic
+            reportTabs.addEventListener('click', (event) => {
+                if (event.target.classList.contains('tab-button')) {
+                    const tabId = event.target.dataset.tab;
+                    switchTab(tabId);
+                }
+            });
+
+            function switchTab(tabId) {
+                // Update active tab button
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('active');
+                });
+                document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active');
+
+                // Show/hide report sections
+                document.querySelectorAll('.report-form-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${tabId}Form`).classList.add('active');
+
+                currentReportType = tabId; // Update current report type
+
+                // Update exam type prefix in Patient Information section
+                examTypePrefix.textContent = `MRI of the ${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`;
+
+                generateReport(); // Regenerate report for the new tab
+            }
+
+            // Helper function to format findings for the main report output (includes normal findings)
+            function formatReportFindingLine(title, checkboxesName, notesId, ...additionalCheckboxNames) {
+                let findings = getSelectedCheckboxes(checkboxesName);
+                if (additionalCheckboxNames.length > 0) {
+                    additionalCheckboxNames.forEach(extraName => {
+                        const extraFindings = getSelectedCheckboxes(extraName);
+                        if (extraFindings.length > 0) {
+                            // Append or integrate based on context. For now, just join.
+                            // This might need more sophisticated logic for specific combinations.
+                            findings = findings.concat(extraFindings);
+                        }
+                    });
+                }
+                
+                const additionalNotes = document.getElementById(notesId).value.trim();
+                
+                if (findings.length > 0 || additionalNotes) {
+                    let content = `- ${title.trim()}: ${findings.join(', ')}`;
+                    if (additionalNotes) {
+                        content += ` ${additionalNotes}`;
+                    }
+                    return content;
+                }
+                return '';
+            }
+
+            // New logic for overallMuscleStatus radio buttons
+            overallMuscleStatusRadios.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    if (event.target.value === 'Abnormal') {
+                        individualMuscleFindingsDiv.classList.remove('hidden');
+                    } else {
+                        individualMuscleFindingsDiv.classList.add('hidden');
+                        // Clear all individual muscle/tendon selections when switching to Normal
+                        document.querySelectorAll('#individualMuscleFindings input[type="checkbox"]').forEach(cb => cb.checked = false);
+                        document.querySelectorAll('#individualMuscleFindings textarea').forEach(ta => ta.value = '');
+                    }
+                    generateReport();
+                });
+            });
+
+            // Section definitions for the "Unselected Structures" reminder
+            const sectionDefinitions = {
+                shoulder: [
+                    {
+                        title: 'Rotator Cuff and Associated Tendons',
+                        elements: [
+                            { name: 'supraspinatus', type: 'checkbox' }, { name: 'supraspinatusTearType', type: 'checkbox' }, { id: 'supraspinatusNotes', type: 'textarea' },
+                            { name: 'infraspinatus', type: 'checkbox' }, { name: 'infraspinatusTearType', type: 'checkbox' }, { id: 'infraspinatusNotes', type: 'textarea' },
+                            { name: 'subscapularis', type: 'checkbox' }, { name: 'subscapularisTearType', type: 'checkbox' }, { id: 'subscapularisNotes', type: 'textarea' },
+                            { name: 'teresMinor', type: 'checkbox' }, { id: 'teresMinorNotes', type: 'textarea' },
+                            { name: 'biceps', type: 'checkbox' }, { id: 'bicepsNotes', type: 'textarea' }
+                        ]
+                    },
+                    {
+                        title: 'Glenoid Labrum',
+                        elements: [{ name: 'shoulderLabrum', type: 'checkbox' }, { id: 'shoulderLabrumNotes', type: 'textarea' }]
+                    },
+                    {
+                        title: 'Musculature',
+                        elements: [{ name: 'shoulderMusculature', type: 'checkbox' }, { name: 'fattyInfiltration', type: 'checkbox' }, { id: 'shoulderMusculatureNotes', type: 'textarea' }]
+                    },
+                    {
+                        title: 'Glenohumeral Joint and Capsulo-Labral Structure',
+                        elements: [{ name: 'shoulderGlenohumeral', type: 'checkbox' }, { id: 'shoulderGlenohumeralNotes', type: 'textarea' }]
+                    },
+                    {
+                        title: 'Acromioclavicular Joint and Related Ligaments',
+                        elements: [{ name: 'shoulderACJoint', type: 'checkbox' }, { id: 'shoulderACJointNotes', type: 'textarea' }]
+                    },
+                    {
+                        title: 'Other Osseous Structures',
+                        elements: [{ name: 'shoulderOsseous', type: 'checkbox' }, { id: 'shoulderOsseousNotes', type: 'textarea' }]
+                    },
+                    {
+                        title: 'Bursae',
+                        elements: [{ name: 'shoulderBursae', type: 'checkbox' }, { id: 'shoulderBursaeNotes', type: 'textarea' }]
+                    },
+                    {
+                        title: 'Neurovascular Bundles',
+                        elements: [{ name: 'shoulderNeurovascular', type: 'checkbox' }, { id: 'shoulderNeurovascularNotes', type: 'textarea' }]
+                    }
+                ],
+                knee: [
+                    {
+                        title: 'Menisci',
+                        elements: [
+                            { name: 'medialMeniscus', type: 'checkbox' }, { name: 'medialMeniscusLocation', type: 'checkbox' }, { name: 'medialMeniscusZone', type: 'checkbox' }, { id: 'medialMeniscusNotes', type: 'textarea' },
+                            { name: 'lateralMeniscus', type: 'checkbox' }, { name: 'lateralMeniscusLocation', type: 'checkbox' }, { name: 'lateralMeniscusZone', type: 'checkbox' }, { id: 'lateralMeniscusNotes', type: 'textarea' }
+                        ]
+                    },
+                    {
+                        title: 'Anterior/Posterior Cruciate and Collateral Ligaments',
+                        elements: [
+                            { name: 'acl', type: 'checkbox' }, { id: 'aclNotes', type: 'textarea' },
+                            { name: 'pcl', type: 'checkbox' }, { id: 'pclNotes', type: 'textarea' },
+                            { name: 'mcl', type: 'checkbox' }, { id: 'mclNotes', type: 'textarea' },
+                            { name: 'lcl', type: 'checkbox' }, { id: 'lclNotes', type: 'textarea' }
+                        ]
+                    },
+                    {
+                        title: 'Extensor Mechanism',
+                        elements: [
+                            { name: 'patellarTendon', type: 'checkbox' }, { id: 'patellarTendonNotes', type: 'textarea' },
+                            { name: 'patellarRetinaculum', type: 'checkbox' }, { id: 'patellarRetinaculumNotes', type: 'textarea' }
+                        ]
+                    },
+                    {
+                        title: 'Muscles and Tendons (Other)',
+                        elements: [
+                            { name: 'overallMuscleStatus', type: 'radio' }, // Special handling for radio
+                            { name: 'quadricepsTendon', type: 'checkbox' }, { id: 'quadricepsTendonNotes', type: 'textarea' },
+                            { name: 'iliotibialBand', type: 'checkbox' }, { id: 'iliotibialBandNotes', type: 'textarea' },
+                            { name: 'popliteusTendon', type: 'checkbox' }, { id: 'popliteusTendonNotes', type: 'textarea' },
+                            { name: 'longHeadBicepsFemorisTendon', type: 'checkbox' }, { id: 'longHeadBicepsFemorisTendonNotes', type: 'textarea' },
+                            { name: 'semitendinosus', type: 'checkbox' }, { id: 'semitendinosusNotes', type: 'textarea' },
+                            { name: 'sartorius', type: 'checkbox' }, { id: 'sartoriusNotes', type: 'textarea' },
+                            { name: 'gracilis', type: 'checkbox' }, { id: 'gracilisNotes', type: 'textarea' },
+                            { name: 'medialGastrocnemius', type: 'checkbox' }, { id: 'medialGastrocnemiusNotes', type: 'textarea' },
+                            { name: 'lateralGastrocnemius', type: 'checkbox' }, { id: 'lateralGastrocnemiusNotes', type: 'textarea' }
+                        ]
+                    },
+                    {
+                        title: 'Bone and Cartilage',
+                        elements: [
+                            { name: 'articularCartilage', type: 'checkbox' }, { id: 'articularCartilageNotes', type: 'textarea' },
+                            { name: 'boneMarrow', type: 'checkbox' }, { id: 'boneMarrowNotes', type: 'textarea' }
+                        ]
+                    },
+                    {
+                        title: 'Joint Effusion / Bursae',
+                        elements: [{ name: 'kneeEffusionBursae', type: 'checkbox' }, { id: 'kneeEffusionBursaeNotes', type: 'textarea' }]
+                    },
+                    {
+                        title: 'Others',
+                        elements: [{ name: 'kneeOtherFindings', type: 'checkbox' }, { id: 'kneeOtherFindingsNotes', type: 'textarea' }]
+                    }
+                ]
+            };
+
+            function getUnselectedSectionsForReminder() {
+                const unselected = [];
+                const currentSections = sectionDefinitions[currentReportType];
+
+                currentSections.forEach(section => {
+                    let isSectionSelected = false;
+                    if (section.title === 'Muscles and Tendons (Other)' && currentReportType === 'knee') {
+                        const overallMuscleStatus = document.querySelector('input[name="overallMuscleStatus"]:checked')?.value;
+                        if (overallMuscleStatus === 'Normal' || overallMuscleStatus === 'Abnormal') {
+                            isSectionSelected = true; // Section is considered selected if overall status is chosen
+                        }
+                        // If overall is abnormal, check individual fields for specific selections
+                        if (overallMuscleStatus === 'Abnormal') {
+                            section.elements.forEach(element => {
+                                if (element.type === 'checkbox') {
+                                    if (getSelectedCheckboxes(element.name).length > 0) {
+                                        isSectionSelected = true;
+                                    }
+                                } else if (element.type === 'textarea') {
+                                    if (document.getElementById(element.id)?.value.trim() !== '') {
+                                        isSectionSelected = true;
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        section.elements.forEach(element => {
+                            if (element.type === 'checkbox') {
+                                if (getSelectedCheckboxes(element.name).length > 0) {
+                                    isSectionSelected = true;
+                                }
+                            } else if (element.type === 'textarea') {
+                                if (document.getElementById(element.id)?.value.trim() !== '') {
+                                    isSectionSelected = true;
+                                }
+                            }
+                        });
+                    }
+
+                    if (!isSectionSelected) {
+                        unselected.push(section.title);
+                    }
+                });
+                return unselected;
+            }
+
+
+            // Main function to generate the report
+            function generateReport() {
+                let report = '';
+
+                // 1. Patient Information (Common)
+                const examDate = document.getElementById('examDate').value.trim();
+                const formattedExamDate = formatDate(examDate);
+                
+                let bodyPart = currentReportType.charAt(0).toUpperCase() + currentReportType.slice(1);
+                let examType = `MRI of the ${bodyPart}`;
+                const selectedSides = getSelectedCheckboxes('bodyPartSide');
+                if (selectedSides.length > 0) {
+                    examType = `MRI of the ${selectedSides.join(' and ')} ${bodyPart}`;
+                }
+
+                const history = document.getElementById('history').value.trim();
+
+                report += `${examType} (${formattedExamDate || 'date'})\n\n`;
+                report += `HISTORY:\n${history || ''}\n\n`;
+
+                // 2. Technique Section (Dynamic based on currentReportType)
+                report += 'TECHNIQUE:\n\n';
+                if (currentReportType === 'shoulder') {
+                    const techniqueAxial = getSelectedCheckboxes('techniqueAxial');
+                    const techniqueAxialNotes = document.getElementById('techniqueAxialNotes').value.trim();
+                    const techniqueCoronal = getSelectedCheckboxes('techniqueCoronal');
+                    const techniqueCoronalNotes = document.getElementById('techniqueCoronalNotes').value.trim();
+                    const techniqueSagittal = getSelectedCheckboxes('techniqueSagittal');
+                    const techniqueSagittalNotes = document.getElementById('techniqueSagittalNotes').value.trim();
+                    const techniqueAcromion = getSelectedCheckboxes('techniqueAcromion');
+                    const techniqueAcromionNotes = document.getElementById('techniqueAcromionNotes').value.trim();
+
+                    if (techniqueAxial.length > 0 || techniqueAxialNotes) report += `Axial: ${techniqueAxial.join(', ')}${techniqueAxialNotes ? ` ${techniqueAxialNotes}` : ''}\n`;
+                    if (techniqueCoronal.length > 0 || techniqueCoronalNotes) report += `Coronal oblique: ${techniqueCoronal.join(', ')}${techniqueCoronalNotes ? ` ${techniqueCoronalNotes}` : ''}\n`;
+                    if (techniqueSagittal.length > 0 || techniqueSagittalNotes) report += `Sagittal oblique: ${techniqueSagittal.join(', ')}${techniqueSagittalNotes ? ` ${techniqueSagittalNotes}` : ''}\n`;
+                    if (techniqueAcromion.length > 0 || techniqueAcromionNotes) report += `Acromion view: ${techniqueAcromion.join(', ')}${techniqueAcromionNotes ? ` ${techniqueAcromionNotes}` : ''}\n`;
+                    
+                    if (techniqueAxial.length === 0 && techniqueAxialNotes === '' &&
+                        techniqueCoronal.length === 0 && techniqueCoronalNotes === '' &&
+                        techniqueSagittal.length === 0 && techniqueSagittalNotes === '' &&
+                        techniqueAcromion.length === 0 && techniqueAcromionNotes === '') {
+                        report += 'No specific technique details selected for Shoulder.\n';
+                    }
+                } else if (currentReportType === 'knee') {
+                    const kneeTechniqueAxial = getSelectedCheckboxes('kneeTechniqueAxial');
+                    const kneeTechniqueAxialNotes = document.getElementById('kneeTechniqueAxialNotes').value.trim();
+                    const kneeTechniqueSagittal = getSelectedCheckboxes('kneeTechniqueSagittal');
+                    const kneeTechniqueSagittalNotes = document.getElementById('kneeTechniqueSagittalNotes').value.trim();
+                    const kneeTechniqueCoronal = getSelectedCheckboxes('kneeTechniqueCoronal');
+                    const kneeTechniqueCoronalNotes = document.getElementById('kneeTechniqueCoronalNotes').value.trim();
+                    const kneeTechniqueObliqueACL = getSelectedCheckboxes('kneeTechniqueObliqueACL');
+                    const kneeTechniqueObliqueACLNotes = document.getElementById('kneeTechniqueObliqueACLNotes').value.trim();
+                    const kneeTechniqueObliquePerpACL = getSelectedCheckboxes('kneeTechniqueObliquePerpACL');
+                    const kneeTechniqueObliquePerpACLNotes = document.getElementById('kneeTechniqueObliquePerpACLNotes').value.trim();
+
+
+                    if (kneeTechniqueAxial.length > 0 || kneeTechniqueAxialNotes) report += `Axial: ${kneeTechniqueAxial.join(', ')}${kneeTechniqueAxialNotes ? ` ${kneeTechniqueAxialNotes}` : ''}\n`;
+                    if (kneeTechniqueSagittal.length > 0 || kneeTechniqueSagittalNotes) report += `Sagittal: ${kneeTechniqueSagittal.join(', ')}${kneeTechniqueSagittalNotes ? ` ${kneeTechniqueSagittalNotes}` : ''}\n`;
+                    if (kneeTechniqueCoronal.length > 0 || kneeTechniqueCoronalNotes) report += `Coronal: ${kneeTechniqueCoronal.join(', ')}${kneeTechniqueCoronalNotes ? ` ${kneeTechniqueCoronalNotes}` : ''}\n`;
+                    if (kneeTechniqueObliqueACL.length > 0 || kneeTechniqueObliqueACLNotes) report += `Oblique coronal along ACL: ${kneeTechniqueObliqueACL.join(', ')}${kneeTechniqueObliqueACLNotes ? ` ${kneeTechniqueObliqueACLNotes}` : ''}\n`;
+                    if (kneeTechniqueObliquePerpACL.length > 0 || kneeTechniqueObliquePerpACLNotes) report += `Oblique perpendicular to ACL: ${kneeTechniqueObliquePerpACL.join(', ')}${kneeTechniqueObliquePerpACLNotes ? ` ${kneeTechniqueObliquePerpACLNotes}` : ''}\n`;
+
+
+                    if (kneeTechniqueAxial.length === 0 && kneeTechniqueAxialNotes === '' &&
+                        kneeTechniqueCoronal.length === 0 && kneeTechniqueCoronalNotes === '' &&
+                        kneeTechniqueSagittal.length === 0 && kneeTechniqueSagittalNotes === '' &&
+                        kneeTechniqueObliqueACL.length === 0 && kneeTechniqueObliqueACLNotes === '' &&
+                        kneeTechniqueObliquePerpACL.length === 0 && kneeTechniqueObliquePerpACLNotes === '') {
+                        report += 'No specific technique details selected for Knee.\n';
+                    }
+                }
+                report += '\n';
+
+                // 3. Comparison Section (Dynamic based on currentReportType)
+                report += 'COMPARISON:\n\n';
+                let comparisonDate = '';
+                if (currentReportType === 'shoulder') {
+                    comparisonDate = document.getElementById('comparisonDateShoulder').value.trim();
+                } else if (currentReportType === 'knee') {
+                    comparisonDate = document.getElementById('comparisonDateKnee').value.trim();
+                }
+                const formattedComparisonDate = formatDate(comparisonDate);
+                if (formattedComparisonDate) {
+                    report += `Previous MRI ${bodyPart.toLowerCase()} on ${formattedComparisonDate}\n\n`;
+                } else {
+                    report += 'No previous comparison available.\n\n';
+                }
+
+                // 4. Findings Section (Dynamic based on currentReportType)
+                report += 'FINDINGS:\n\n';
+                report += `${bodyPart.toUpperCase()}:\n\n`;
+
+                if (currentReportType === 'shoulder') {
+                    // Rotator Cuff Tendons
+                    report += '#ROTATOR CUFF AND ASSOCIATED TENDONS:\n';
+                    let supraspinatusLine = formatReportFindingLine('Supraspinatus Tendon', 'supraspinatus', 'supraspinatusNotes', 'supraspinatusTearType');
+                    if (supraspinatusLine) report += `${supraspinatusLine}\n`;
+
+                    let infraspinatusLine = formatReportFindingLine('Infraspinatus Tendon', 'infraspinatus', 'infraspinatusNotes', 'infraspinatusTearType');
+                    if (infraspinatusLine) report += `${infraspinatusLine}\n`;
+
+                    let subscapularisLine = formatReportFindingLine('Subscapularis Tendon', 'subscapularis', 'subscapularisNotes', 'subscapularisTearType');
+                    if (subscapularisLine) report += `${subscapularisLine}\n`;
+
+                    let teresMinorLine = formatReportFindingLine('Teres Minor Tendon', 'teresMinor', 'teresMinorNotes');
+                    if (teresMinorLine) report += `${teresMinorLine}\n`;
+
+                    let bicepsLine = formatReportFindingLine('Long Head of Biceps Tendon', 'biceps', 'bicepsNotes');
+                    if (bicepsLine) report += `${bicepsLine}\n`;
+
+                    if (supraspinatusLine || infraspinatusLine || subscapularisLine || teresMinorLine || bicepsLine) {
+                        report += '\n';
+                    }
+
+                    // Glenoid Labrum
+                    report += '#GLENOID LABRUM:\n';
+                    let labrumLine = formatReportFindingLine('GLENOID LABRUM', 'shoulderLabrum', 'shoulderLabrumNotes');
+                    if (labrumLine) report += `${labrumLine}\n\n`;
+                    else report += '\n';
+
+                    // Musculature
+                    report += '#MUSCULATURE:\n';
+                    let musculatureReportFindings = getSelectedCheckboxes('shoulderMusculature');
+                    let fattyInfiltrationReport = getSelectedCheckboxes('fattyInfiltration');
+                    let musculatureReportNotes = document.getElementById('shoulderMusculatureNotes').value.trim();
+                    if (musculatureReportFindings.length > 0 || fattyInfiltrationReport.length > 0 || musculatureReportNotes) {
+                        let combinedMusculature = [];
+                        if (musculatureReportFindings.length > 0) combinedMusculature.push(...musculatureReportFindings);
+                        if (fattyInfiltrationReport.length > 0) combinedMusculature.push(`Fatty Infiltration: ${fattyInfiltrationReport.join(', ')}`);
+                        
+                        let item = `- MUSCULATURE: ${combinedMusculature.join(', ')}`;
+                        if (musculatureReportNotes) item += ` ${musculatureReportNotes}`;
+                        report += `${item}\n\n`;
+                    } else {
+                        report += '\n';
+                    }
+
+                    // Glenohumeral Joint and Capsulo-Labral Structure
+                    report += '#GLENOHUMERAL JOINT AND CAPSULO-LABRAL STRUCTURE:\n';
+                    let glenohumeralLine = formatReportFindingLine('GLENOHUMERAL JOINT AND CAPSULO-LABRAL STRUCTURE', 'shoulderGlenohumeral', 'shoulderGlenohumeralNotes');
+                    if (glenohumeralLine) report += `${glenohumeralLine}\n\n`;
+                    else report += '\n';
+
+                    // ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS
+                    report += '#ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS:\n';
+                    let acJointLine = formatReportFindingLine('ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS', 'shoulderACJoint', 'shoulderACJointNotes');
+                    if (acJointLine) report += `${acJointLine}\n\n`;
+                    else report += '\n';
+
+                    // OTHER OSSEOUS STRUCTURES
+                    report += '#OTHER OSSEOUS STRUCTURES:\n';
+                    let osseousLine = formatReportFindingLine('OTHER OSSEOUS STRUCTURES', 'shoulderOsseous', 'shoulderOsseousNotes');
+                    if (osseousLine) report += `${osseousLine}\n\n`;
+                    else report += '\n';
+
+                    // BURSAE
+                    report += '#BURSAE:\n';
+                    let bursaeLine = formatReportFindingLine('BURSAE', 'shoulderBursae', 'shoulderBursaeNotes');
+                    if (bursaeLine) report += `${bursaeLine}\n\n`;
+                    else report += '\n';
+
+                    // NEUROVASCULAR BUNDLES
+                    report += '#NEUROVASCULAR BUNDLES:\n';
+                    let neurovascularLine = formatReportFindingLine('NEUROVASCULAR BUNDLES', 'shoulderNeurovascular', 'shoulderNeurovascularNotes');
+                    if (neurovascularLine) report += `${neurovascularLine}\n\n`;
+                    else report += '\n';
+
+                } else if (currentReportType === 'knee') {
+                    // Menisci
+                    report += '#MENISCI:\n';
+                    let medialMeniscusLine = formatReportFindingLine('Medial Meniscus', 'medialMeniscus', 'medialMeniscusNotes', 'medialMeniscusLocation', 'medialMeniscusZone');
+                    if (medialMeniscusLine) report += `${medialMeniscusLine}\n`;
+                    let lateralMeniscusLine = formatReportFindingLine('Lateral Meniscus', 'lateralMeniscus', 'lateralMeniscusNotes', 'lateralMeniscusLocation', 'lateralMeniscusZone');
+                    if (lateralMeniscusLine) report += `${lateralMeniscusLine}\n`;
+                    if (medialMeniscusLine || lateralMeniscusLine) report += '\n';
+                    else report += '\n';
+
+                    // Ligaments - Knee (Updated Logic for individual appearance)
+                    const aclFindings = getSelectedCheckboxes('acl');
+                    const aclNotes = document.getElementById('aclNotes').value.trim();
+                    const pclFindings = getSelectedCheckboxes('pcl');
+                    const pclNotes = document.getElementById('pclNotes').value.trim();
+                    const mclFindings = getSelectedCheckboxes('mcl');
+                    const mclNotes = document.getElementById('mclNotes').value.trim();
+                    const lclFindings = getSelectedCheckboxes('lcl');
+                    const lclNotes = document.getElementById('lclNotes').value.trim();
+
+                    // Determine if the overall Ligament section heading should appear
+                    const shouldShowLigamentSection =
+                        (aclFindings.length > 0 || aclNotes) ||
+                        (pclFindings.length > 0 || pclNotes) ||
+                        (mclFindings.length > 0 || mclNotes) ||
+                        (lclFindings.length > 0 || lclNotes);
+
+                    if (shouldShowLigamentSection) {
+                        report += '#ANTERIOR/POSTERIOR CRUCIATE AND COLLATERAL LIGAMENTS:\n';
+
+                        // Only add a line for ACL if something is selected or noted
+                        if (aclFindings.length > 0 || aclNotes) {
+                            report += `- Anterior cruciate ligament (ACL): ${aclFindings.join(', ')}${aclNotes ? ` ${aclNotes}` : ''}\n`;
+                        }
+                        // Only add a line for PCL if something is selected or noted
+                        if (pclFindings.length > 0 || pclNotes) {
+                            report += `- Posterior cruciate ligament (PCL): ${pclFindings.join(', ')}${pclNotes ? ` ${pclNotes}` : ''}\n`;
+                        }
+                        // Only add a line for MCL if something is selected or noted
+                        if (mclFindings.length > 0 || mclNotes) {
+                            report += `- Medial collateral ligament (MCL): ${mclFindings.join(', ')}${mclNotes ? ` ${mclNotes}` : ''}\n`;
+                        }
+                        // Only add a line for FCL if something is selected or noted
+                        if (lclFindings.length > 0 || lclNotes) {
+                            report += `- Fibular collateral ligament (FCL): ${lclFindings.join(', ')}${lclNotes ? ` ${lclNotes}` : ''}\n`;
+                        }
+                        report += '\n'; // Add newline after the section
+                    }
+
+
+                    // Extensor Mechanism
+                    const patellarTendonFindings = getSelectedCheckboxes('patellarTendon');
+                    if (patellarTendonFindings.length > 0) {
+                        patellarTendonFindings.forEach(finding => {
+                            report += `- Patellar Tendon: ${finding}\n`;
+                        });
+                    }
+                    const patellarTendonNotes = document.getElementById('patellarTendonNotes').value.trim();
+                    if (patellarTendonNotes) report += `${patellarTendonNotes}\n`;
+
+                    const patellarRetinaculumFindings = getSelectedCheckboxes('patellarRetinaculum');
+                    if (patellarRetinaculumFindings.length > 0) {
+                        patellarRetinaculumFindings.forEach(finding => {
+                            report += `- Patellar Retinaculum / Medial Patellofemoral Ligament (MPFL): ${finding}\n`;
+                        });
+                    }
+                    const patellarRetinaculumNotes = document.getElementById('patellarRetinaculumNotes').value.trim();
+                    if (patellarRetinaculumNotes) report += `${patellarRetinaculumNotes}\n`;
+                    
+                    report += '\n';
+
+                    // Other Muscles and Tendons (Updated Logic)
+                    const overallMuscleStatus = document.querySelector('input[name="overallMuscleStatus"]:checked')?.value;
+                    
+                    // Only print the section if 'Normal' or 'Abnormal' is selected
+                    if (overallMuscleStatus) {
+                        report += '#MUSCLES AND TENDONS (OTHER):\n';
+
+                        if (overallMuscleStatus === 'Normal') {
+                            report += `- Quadriceps Tendon: Normal course and SI.\n`;
+                            report += `- Iliotibial band: Normal course and SI.\n`;
+                            report += `- Popliteus tendon: Normal course and SI.\n`;
+                            report += `- Long head of biceps femoris tendon: Normal course and SI.\n`;
+                            report += `- Semitendinosus, sartorius, gracilis, medial and lateral head of gastrocnemius muscles: Unremarkable.\n`;
+                        } else if (overallMuscleStatus === 'Abnormal') {
+                            // Quadriceps Tendon
+                            const quadricepsTendonFindings = getSelectedCheckboxes('quadricepsTendon');
+                            const quadricepsTendonNotes = document.getElementById('quadricepsTendonNotes').value.trim();
+                            report += `- Quadriceps Tendon: ${quadricepsTendonFindings.length > 0 ? quadricepsTendonFindings.join(', ') : 'Normal course and SI.'}${quadricepsTendonNotes ? ` ${quadricepsTendonNotes}` : ''}\n`;
+
+                            // Iliotibial Band
+                            const iliotibialBandFindings = getSelectedCheckboxes('iliotibialBand');
+                            const iliotibialBandNotes = document.getElementById('iliotibialBandNotes').value.trim();
+                            report += `- Iliotibial Band: ${iliotibialBandFindings.length > 0 ? iliotibialBandFindings.join(', ') : 'Normal course and SI.'}${iliotibialBandNotes ? ` ${iliotibialBandNotes}` : ''}\n`;
+
+                            // Popliteus Tendon
+                            const popliteusTendonFindings = getSelectedCheckboxes('popliteusTendon');
+                            const popliteusTendonNotes = document.getElementById('popliteusTendonNotes').value.trim();
+                            report += `- Popliteus Tendon: ${popliteusTendonFindings.length > 0 ? popliteusTendonFindings.join(', ') : 'Normal course and SI.'}${popliteusTendonNotes ? ` ${popliteusTendonNotes}` : ''}\n`;
+
+                            // Long Head of Biceps Femoris Tendon
+                            const longHeadBicepsFemorisTendonFindings = getSelectedCheckboxes('longHeadBicepsFemorisTendon');
+                            const longHeadBicepsFemorisTendonNotes = document.getElementById('longHeadBicepsFemorisTendonNotes').value.trim();
+                            report += `- Long head of biceps femoris tendon: ${longHeadBicepsFemorisTendonFindings.length > 0 ? longHeadBicepsFemorisTendonFindings.join(', ') : 'Normal course and SI.'}${longHeadBicepsFemorisTendonNotes ? ` ${longHeadBicepsFemorisTendonNotes}` : ''}\n`;
+
+                            // Grouped muscles: Semitendinosus, Sartorius, Gracilis, Medial/Lateral Gastrocnemius
+                            const specificMuscles = [
+                                { name: 'semitendinosus', label: 'Semitendinosus', default: 'Unremarkable' },
+                                { name: 'sartorius', label: 'Sartorius', default: 'Unremarkable' },
+                                { name: 'gracilis', label: 'Gracilis', default: 'Unremarkable' },
+                                { name: 'medialGastrocnemius', label: 'Medial head of gastrocnemius', default: 'Unremarkable' },
+                                { name: 'lateralGastrocnemius', label: 'Lateral head of gastrocnemius', default: 'Unremarkable' }
+                            ];
+
+                            let allSpecificMusclesUnremarkable = true;
+                            let individualMuscleLines = [];
+
+                            specificMuscles.forEach(muscle => {
+                                const findings = getSelectedCheckboxes(muscle.name);
+                                const notes = document.getElementById(`${muscle.name}Notes`).value.trim();
+
+                                if (findings.length > 1 || (findings.length === 1 && findings[0] !== muscle.default) || notes) {
+                                    allSpecificMusclesUnremarkable = false;
+                                }
+                                individualMuscleLines.push(`- ${muscle.label}: ${findings.length > 0 ? findings.join(', ') : muscle.default + '.'}${notes ? ` ${notes}` : ''}`);
+                            });
+
+                            if (allSpecificMusclesUnremarkable) {
+                                report += `- Semitendinosus, sartorius, gracilis, medial and lateral head of gastrocnemius muscles: Unremarkable.\n`;
+                            } else {
+                                individualMuscleLines.forEach(line => {
+                                    report += `${line}\n`;
+                                });
+                            }
+                        }
+                        report += '\n'; // Add a newline after the muscle/tendon section if it appears
+                    }
+
+                    // Bone and Cartilage
+                    report += '#BONE AND CARTILAGE:\n';
+                    let articularCartilageLine = formatReportFindingLine('Articular Cartilage', 'articularCartilage', 'articularCartilageNotes');
+                    if (articularCartilageLine) report += `${articularCartilageLine}\n`;
+                    let boneMarrowLine = formatReportFindingLine('Bone Marrow / Osseous Structures', 'boneMarrow', 'boneMarrowNotes');
+                    if (boneMarrowLine) report += `${boneMarrowLine}\n\n`;
+                    else report += '\n';
+
+                    // Joint Effusion / Bursae - Knee
+                    report += '#JOINT EFFUSION / BURSAE:\n';
+                    let kneeEffusionBursaeLine = formatReportFindingLine('JOINT EFFUSION / BURSAE', 'kneeEffusionBursae', 'kneeEffusionBursaeNotes');
+                    if (kneeEffusionBursaeLine) report += `${kneeEffusionBursaeLine}\n\n`;
+                    else report += '\n';
+
+                    // Other Findings - Knee
+                    report += '#OTHERS:\n';
+                    let kneeOtherFindingsLine = formatReportFindingLine('', 'kneeOtherFindings', 'kneeOtherFindingsNotes');
+                    if (kneeOtherFindingsLine) report += `${kneeOtherFindingsLine.replace('- : ', '- ')}\n\n`; // Remove the empty title and colon
+                    else report += '\n';
+                }
+
+                // Update unselected structures reminder
+                const unselectedSections = getUnselectedSectionsForReminder();
+                if (unselectedSections.length > 0) {
+                    unselectedStructuresReminder.innerHTML = `<strong>Reminder:</strong> The following sections have no findings selected or notes entered:<ul>${unselectedSections.map(s => `<li>${s}</li>`).join('')}</ul>`;
+                    unselectedStructuresReminder.classList.remove('hidden');
+                } else {
+                    unselectedStructuresReminder.classList.add('hidden');
+                }
+
+                // 5. Impression (User-filled)
+                report += 'IMPRESSION:\n\n';
+                report += `${impressionOutput.value.trim()}\n\n`;
+
+                // 6. Radiologist Signature (Common)
+                report += 'RADIOLOGIST SIGNATURE:\n';
+                const radiologistName = document.getElementById('radiologistName').value.trim();
+                if (radiologistName) {
+                    report += `${radiologistName}\n\n`;
+                } else {
+                    report += '\n';
+                }
+
+                report += `Report Generated: ${formatDate(new Date().toISOString().slice(0, 10))}\n`;
+
+                // Display report on the same page
+                reportOutput.textContent = report;
+
+                // After generating, save the current state if it's an existing report
+                if (currentReportId) {
+                    saveCurrentReport(false); // Save without prompting for name
+                }
+            }
+
+            // Function to capture the current form state for undo
+            function captureFormState() {
+                return {
+                    examDate: document.getElementById('examDate').value,
+                    bodyPartSide: getSelectedCheckboxes('bodyPartSide'),
+                    history: document.getElementById('history').value,
+                    impression: impressionOutput.value,
+                    radiologistName: document.getElementById('radiologistName').value,
+                    currentReportType: currentReportType,
+                    shoulderData: {
+                        techniqueAxial: getSelectedCheckboxes('techniqueAxial'), techniqueAxialNotes: document.getElementById('techniqueAxialNotes').value,
+                        techniqueCoronal: getSelectedCheckboxes('techniqueCoronal'), techniqueCoronalNotes: document.getElementById('techniqueCoronalNotes').value,
+                        techniqueSagittal: getSelectedCheckboxes('techniqueSagittal'), techniqueSagittalNotes: document.getElementById('techniqueSagittalNotes').value,
+                        techniqueAcromion: getSelectedCheckboxes('techniqueAcromion'), techniqueAcromionNotes: document.getElementById('techniqueAcromionNotes').value,
+                        comparisonDateShoulder: document.getElementById('comparisonDateShoulder').value,
+                        supraspinatus: getSelectedCheckboxes('supraspinatus'), supraspinatusTearType: getSelectedCheckboxes('supraspinatusTearType'), supraspinatusNotes: document.getElementById('supraspinatusNotes').value,
+                        infraspinatus: getSelectedCheckboxes('infraspinatus'), infraspinatusTearType: getSelectedCheckboxes('infraspinatusTearType'), infraspinatusNotes: document.getElementById('infraspinatusNotes').value,
+                        subscapularis: getSelectedCheckboxes('subscapularis'), subscapularisTearType: getSelectedCheckboxes('subscapularisTearType'), subscapularisNotes: document.getElementById('subscapularisNotes').value,
+                        teresMinor: getSelectedCheckboxes('teresMinor'), teresMinorNotes: document.getElementById('teresMinorNotes').value,
+                        biceps: getSelectedCheckboxes('biceps'), bicepsNotes: document.getElementById('bicepsNotes').value,
+                        shoulderLabrum: getSelectedCheckboxes('shoulderLabrum'), shoulderLabrumNotes: document.getElementById('shoulderLabrumNotes').value,
+                        shoulderMusculature: getSelectedCheckboxes('shoulderMusculature'), fattyInfiltration: getSelectedCheckboxes('fattyInfiltration'), shoulderMusculatureNotes: document.getElementById('shoulderMusculatureNotes').value,
+                        shoulderGlenohumeral: getSelectedCheckboxes('shoulderGlenohumeral'), shoulderGlenohumeralNotes: document.getElementById('shoulderGlenohumeralNotes').value,
+                        shoulderACJoint: getSelectedCheckboxes('shoulderACJoint'), shoulderACJointNotes: document.getElementById('shoulderACJointNotes').value,
+                        shoulderOsseous: getSelectedCheckboxes('shoulderOsseous'), shoulderOsseousNotes: document.getElementById('shoulderOsseousNotes').value,
+                        shoulderBursae: getSelectedCheckboxes('shoulderBursae'), shoulderBursaeNotes: document.getElementById('shoulderBursaeNotes').value,
+                        shoulderNeurovascular: getSelectedCheckboxes('shoulderNeurovascular'), shoulderNeurovascularNotes: document.getElementById('shoulderNeurovascularNotes').value,
+                    },
+                    kneeData: {
+                        kneeTechniqueAxial: getSelectedCheckboxes('kneeTechniqueAxial'), kneeTechniqueAxialNotes: document.getElementById('kneeTechniqueAxialNotes').value,
+                        kneeTechniqueSagittal: getSelectedCheckboxes('kneeTechniqueSagittal'), kneeTechniqueSagittalNotes: document.getElementById('kneeTechniqueSagittalNotes').value,
+                        kneeTechniqueCoronal: getSelectedCheckboxes('kneeTechniqueCoronal'), kneeTechniqueCoronalNotes: document.getElementById('kneeTechniqueCoronalNotes').value,
+                        kneeTechniqueObliqueACL: getSelectedCheckboxes('kneeTechniqueObliqueACL'), kneeTechniqueObliqueACLNotes: document.getElementById('kneeTechniqueObliqueACLNotes').value,
+                        kneeTechniqueObliquePerpACL: getSelectedCheckboxes('kneeTechniqueObliquePerpACL'), kneeTechniqueObliquePerpACLNotes: document.getElementById('kneeTechniqueObliquePerpACLNotes').value,
+                        comparisonDateKnee: document.getElementById('comparisonDateKnee').value,
+                        medialMeniscus: getSelectedCheckboxes('medialMeniscus'), medialMeniscusLocation: getSelectedCheckboxes('medialMeniscusLocation'), medialMeniscusZone: getSelectedCheckboxes('medialMeniscusZone'), medialMeniscusNotes: document.getElementById('medialMeniscusNotes').value,
+                        lateralMeniscus: getSelectedCheckboxes('lateralMeniscus'), lateralMeniscusLocation: getSelectedCheckboxes('lateralMeniscusLocation'), lateralMeniscusZone: getSelectedCheckboxes('lateralMeniscusZone'), lateralMeniscusNotes: document.getElementById('lateralMeniscusNotes').value,
+                        acl: getSelectedCheckboxes('acl'), aclNotes: document.getElementById('aclNotes').value,
+                        pcl: getSelectedCheckboxes('pcl'), pclNotes: document.getElementById('pclNotes').value,
+                        mcl: getSelectedCheckboxes('mcl'), mclNotes: document.getElementById('mclNotes').value,
+                        lcl: getSelectedCheckboxes('lcl'), lclNotes: document.getElementById('lclNotes').value,
+                        patellarTendon: getSelectedCheckboxes('patellarTendon'), patellarTendonNotes: document.getElementById('patellarTendonNotes').value,
+                        patellarRetinaculum: getSelectedCheckboxes('patellarRetinaculum'), patellarRetinaculumNotes: document.getElementById('patellarRetinaculumNotes').value,
+                        overallMuscleStatus: document.querySelector('input[name="overallMuscleStatus"]:checked')?.value || '',
+                        quadricepsTendon: getSelectedCheckboxes('quadricepsTendon'), quadricepsTendonNotes: document.getElementById('quadricepsTendonNotes').value,
+                        iliotibialBand: getSelectedCheckboxes('iliotibialBand'), iliotibialBandNotes: document.getElementById('iliotibialBandNotes').value,
+                        popliteusTendon: getSelectedCheckboxes('popliteusTendon'), popliteusTendonNotes: document.getElementById('popliteusTendonNotes').value,
+                        longHeadBicepsFemorisTendon: getSelectedCheckboxes('longHeadBicepsFemorisTendon'), longHeadBicepsFemorisTendonNotes: document.getElementById('longHeadBicepsFemorisTendonNotes').value,
+                        semitendinosus: getSelectedCheckboxes('semitendinosus'), semitendinosusNotes: document.getElementById('semitendinosusNotes').value,
+                        sartorius: getSelectedCheckboxes('sartorius'), sartoriusNotes: document.getElementById('sartoriusNotes').value,
+                        gracilis: getSelectedCheckboxes('gracilis'), gracilisNotes: document.getElementById('gracilisNotes').value,
+                        medialGastrocnemius: getSelectedCheckboxes('medialGastrocnemius'), medialGastrocnemiusNotes: document.getElementById('medialGastrocnemiusNotes').value,
+                        lateralGastrocnemius: getSelectedCheckboxes('lateralGastrocnemius'), lateralGastrocnemiusNotes: document.getElementById('lateralGastrocnemiusNotes').value,
+                        articularCartilage: getSelectedCheckboxes('articularCartilage'), articularCartilageNotes: document.getElementById('articularCartilageNotes').value,
+                        boneMarrow: getSelectedCheckboxes('boneMarrow'), boneMarrowNotes: document.getElementById('boneMarrowNotes').value,
+                        kneeEffusionBursae: getSelectedCheckboxes('kneeEffusionBursae'), kneeEffusionBursaeNotes: document.getElementById('kneeEffusionBursaeNotes').value,
+                        kneeOtherFindings: getSelectedCheckboxes('kneeOtherFindings'), kneeOtherFindingsNotes: document.getElementById('kneeOtherFindingsNotes').value,
+                    }
+                };
+            }
+
+            // Function to restore form state
+            function restoreFormState(state) {
+                if (!state) return;
+
+                document.getElementById('examDate').value = state.examDate;
+                setCheckboxes('bodyPartSide', state.bodyPartSide);
+                document.getElementById('history').value = state.history;
+                document.getElementById('impression').value = state.impression;
+                document.getElementById('radiologistName').value = state.radiologistName;
+
+                // Restore current tab and trigger switch
+                switchTab(state.currentReportType);
+
+                // Restore shoulder specific data
+                if (state.shoulderData) {
+                    setCheckboxes('techniqueAxial', state.shoulderData.techniqueAxial);
+                    document.getElementById('techniqueAxialNotes').value = state.shoulderData.techniqueAxialNotes || '';
+                    setCheckboxes('techniqueCoronal', state.shoulderData.techniqueCoronal);
+                    document.getElementById('techniqueCoronalNotes').value = state.shoulderData.techniqueCoronalNotes || '';
+                    setCheckboxes('techniqueSagittal', state.shoulderData.techniqueSagittal);
+                    document.getElementById('techniqueSagittalNotes').value = state.shoulderData.techniqueSagittalNotes || '';
+                    setCheckboxes('techniqueAcromion', state.shoulderData.techniqueAcromion);
+                    document.getElementById('techniqueAcromionNotes').value = state.shoulderData.techniqueAcromionNotes || '';
+                    document.getElementById('comparisonDateShoulder').value = state.shoulderData.comparisonDateShoulder || '';
+                    setCheckboxes('supraspinatus', state.shoulderData.supraspinatus);
+                    setCheckboxes('supraspinatusTearType', state.shoulderData.supraspinatusTearType);
+                    document.getElementById('supraspinatusNotes').value = state.shoulderData.supraspinatusNotes;
+                    setCheckboxes('infraspinatus', state.shoulderData.infraspinatus);
+                    setCheckboxes('infraspinatusTearType', state.shoulderData.infraspinatusTearType);
+                    document.getElementById('infraspinatusNotes').value = state.shoulderData.infraspinatusNotes;
+                    setCheckboxes('subscapularis', state.shoulderData.subscapularis);
+                    setCheckboxes('subscapularisTearType', state.shoulderData.subscapularisTearType);
+                    document.getElementById('subscapularisNotes').value = state.shoulderData.subscapularisNotes;
+                    setCheckboxes('teresMinor', state.shoulderData.teresMinor);
+                    document.getElementById('teresMinorNotes').value = state.shoulderData.teresMinorNotes;
+                    setCheckboxes('biceps', state.shoulderData.biceps);
+                    document.getElementById('bicepsNotes').value = state.shoulderData.bicepsNotes;
+                    setCheckboxes('shoulderLabrum', state.shoulderData.shoulderLabrum);
+                    document.getElementById('shoulderLabrumNotes').value = state.shoulderData.shoulderLabrumNotes;
+                    setCheckboxes('shoulderMusculature', state.shoulderData.shoulderMusculature);
+                    setCheckboxes('fattyInfiltration', state.shoulderData.fattyInfiltration);
+                    document.getElementById('shoulderMusculatureNotes').value = state.shoulderData.shoulderMusculatureNotes;
+                    setCheckboxes('shoulderGlenohumeral', state.shoulderData.shoulderGlenohumeral);
+                    document.getElementById('shoulderGlenohumeralNotes').value = state.shoulderData.shoulderGlenohumeralNotes;
+                    setCheckboxes('shoulderACJoint', state.shoulderData.shoulderACJoint);
+                    document.getElementById('shoulderACJointNotes').value = state.shoulderData.shoulderACJointNotes;
+                    setCheckboxes('shoulderOsseous', state.shoulderData.shoulderOsseous);
+                    document.getElementById('shoulderOsseousNotes').value = state.shoulderData.shoulderOsseousNotes;
+                    setCheckboxes('shoulderBursae', state.shoulderData.shoulderBursae);
+                    document.getElementById('shoulderBursaeNotes').value = state.shoulderData.shoulderBursaeNotes;
+                    setCheckboxes('shoulderNeurovascular', state.shoulderData.shoulderNeurovascular);
+                    document.getElementById('shoulderNeurovascularNotes').value = state.shoulderData.shoulderNeurovascularNotes;
+                }
+
+                // Restore knee specific data
+                if (state.kneeData) {
+                    setCheckboxes('kneeTechniqueAxial', state.kneeData.kneeTechniqueAxial);
+                    document.getElementById('kneeTechniqueAxialNotes').value = state.kneeData.kneeTechniqueAxialNotes || '';
+                    setCheckboxes('kneeTechniqueSagittal', state.kneeData.kneeTechniqueSagittal);
+                    document.getElementById('kneeTechniqueSagittalNotes').value = state.kneeData.kneeTechniqueSagittalNotes || '';
+                    setCheckboxes('kneeTechniqueCoronal', state.kneeData.kneeTechniqueCoronal);
+                    document.getElementById('kneeTechniqueCoronalNotes').value = state.kneeData.kneeTechniqueCoronalNotes || '';
+                    setCheckboxes('kneeTechniqueObliqueACL', state.kneeData.kneeTechniqueObliqueACL);
+                    document.getElementById('kneeTechniqueObliqueACLNotes').value = state.kneeData.kneeTechniqueObliqueACLNotes || '';
+                    setCheckboxes('kneeTechniqueObliquePerpACL', state.kneeData.kneeTechniqueObliquePerpACL);
+                    document.getElementById('kneeTechniqueObliquePerpACLNotes').value = state.kneeData.kneeTechniqueObliquePerpACLNotes || '';
+                    document.getElementById('comparisonDateKnee').value = state.kneeData.comparisonDateKnee || '';
+                    setCheckboxes('medialMeniscus', state.kneeData.medialMeniscus);
+                    setCheckboxes('medialMeniscusLocation', state.kneeData.medialMeniscusLocation);
+                    setCheckboxes('medialMeniscusZone', state.kneeData.medialMeniscusZone);
+                    document.getElementById('medialMeniscusNotes').value = state.kneeData.medialMeniscusNotes;
+                    setCheckboxes('lateralMeniscus', state.kneeData.lateralMeniscus);
+                    setCheckboxes('lateralMeniscusLocation', state.kneeData.lateralMeniscusLocation);
+                    setCheckboxes('lateralMeniscusZone', state.kneeData.lateralMeniscusZone);
+                    document.getElementById('lateralMeniscusNotes').value = state.kneeData.lateralMeniscusNotes;
+                    setCheckboxes('acl', state.kneeData.acl);
+                    document.getElementById('aclNotes').value = state.kneeData.aclNotes;
+                    setCheckboxes('pcl', state.kneeData.pcl);
+                    document.getElementById('pclNotes').value = state.kneeData.pclNotes;
+                    setCheckboxes('mcl', state.kneeData.mcl);
+                    document.getElementById('mclNotes').value = state.kneeData.mclNotes;
+                    setCheckboxes('lcl', state.kneeData.lcl);
+                    document.getElementById('lclNotes').value = state.kneeData.lclNotes;
+                    setCheckboxes('patellarTendon', state.kneeData.patellarTendon);
+                    document.getElementById('patellarTendonNotes').value = state.kneeData.patellarTendonNotes;
+                    setCheckboxes('patellarRetinaculum', state.kneeData.patellarRetinaculum);
+                    document.getElementById('patellarRetinaculumNotes').value = state.kneeData.patellarRetinaculumNotes;
+                    
+                    if (state.kneeData.overallMuscleStatus === 'Normal') {
+                        document.getElementById('overallMuscleStatusNormal').checked = true;
+                        individualMuscleFindingsDiv.classList.add('hidden');
+                    } else if (state.kneeData.overallMuscleStatus === 'Abnormal') {
+                        document.getElementById('overallMuscleStatusAbnormal').checked = true;
+                        individualMuscleFindingsDiv.classList.remove('hidden');
+                    } else {
+                        // No status saved or cleared, hide by default
+                        document.getElementById('overallMuscleStatusNormal').checked = false;
+                        document.getElementById('overallMuscleStatusAbnormal').checked = false;
+                        individualMuscleFindingsDiv.classList.add('hidden');
+                    }
+                    setCheckboxes('quadricepsTendon', state.kneeData.quadricepsTendon || []);
+                    document.getElementById('quadricepsTendonNotes').value = state.kneeData.quadricepsTendonNotes || '';
+                    setCheckboxes('iliotibialBand', state.kneeData.iliotibialBand || []);
+                    document.getElementById('iliotibialBandNotes').value = state.kneeData.iliotibialBandNotes || '';
+                    setCheckboxes('popliteusTendon', state.kneeData.popliteusTendon || []);
+                    document.getElementById('popliteusTendonNotes').value = state.kneeData.popliteusTendonNotes || '';
+                    setCheckboxes('longHeadBicepsFemorisTendon', state.kneeData.longHeadBicepsFemorisTendon || []);
+                    document.getElementById('longHeadBicepsFemorisTendonNotes').value = state.kneeData.longHeadBicepsFemorisTendonNotes || '';
+                    setCheckboxes('semitendinosus', state.kneeData.semitendinosus || []);
+                    document.getElementById('semitendinosusNotes').value = state.kneeData.semitendinosusNotes || '';
+                    setCheckboxes('sartorius', state.kneeData.sartorius || []);
+                    document.getElementById('sartoriusNotes').value = state.kneeData.sartoriusNotes || '';
+                    setCheckboxes('gracilis', state.kneeData.gracilis || []);
+                    document.getElementById('gracilisNotes').value = state.kneeData.gracilisNotes || '';
+                    setCheckboxes('medialGastrocnemius', state.kneeData.medialGastrocnemius || []);
+                    document.getElementById('medialGastrocnemiusNotes').value = state.kneeData.medialGastrocnemiusNotes || '';
+                    setCheckboxes('lateralGastrocnemius', state.kneeData.lateralGastrocnemius || []);
+                    document.getElementById('lateralGastrocnemiusNotes').value = state.kneeData.lateralGastrocnemiusNotes || '';
+
+                    setCheckboxes('articularCartilage', state.kneeData.articularCartilage);
+                    document.getElementById('articularCartilageNotes').value = state.kneeData.articularCartilageNotes;
+                    setCheckboxes('boneMarrow', state.kneeData.boneMarrow);
+                    document.getElementById('boneMarrowNotes').value = state.kneeData.boneMarrowNotes;
+                    setCheckboxes('kneeEffusionBursae', state.kneeData.kneeEffusionBursae);
+                    document.getElementById('kneeEffusionBursaeNotes').value = state.kneeData.kneeEffusionBursaeNotes;
+                    setCheckboxes('kneeOtherFindings', state.kneeData.kneeOtherFindings);
+                    document.getElementById('kneeOtherFindingsNotes').value = state.kneeData.kneeOtherFindingsNotes;
+                }
+
+                generateReport(); // Regenerate report output based on restored data
+                renderReportList(); // Update active button
+            }
+
+            // Function to clear all form fields
+            function clearForm() {
+                undoState = captureFormState(); // Save current state for undo
+
+                document.getElementById('examDate').value = '';
+                bodyPartSideCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                document.getElementById('history').value = '';
+                document.getElementById('radiologistName').value = '';
+                document.getElementById('impression').value = '';
+
+                // Clear all checkboxes and textareas in both shoulder and knee sections
+                document.querySelectorAll('.report-form-section input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                document.querySelectorAll('.report-form-section textarea').forEach(textarea => {
+                    textarea.value = '';
+                });
+                document.querySelectorAll('.report-form-section input[type="date"]').forEach(input => {
+                    input.value = '';
+                });
+
+                // Clear overallMuscleStatus radio buttons and hide individual findings
+                document.getElementById('overallMuscleStatusNormal').checked = false;
+                document.getElementById('overallMuscleStatusAbnormal').checked = false;
+                individualMuscleFindingsDiv.classList.add('hidden');
+
+                reportOutput.textContent = 'Your generated report will appear here.';
+                currentReportId = null; // No report loaded
+                renderReportList(); // Update list to reflect no active report
+                switchTab(currentReportType); // Re-activate current tab to update examTypePrefix
+            }
+
+            // Function to create a new report
+            function newReport() {
+                clearForm();
+                generateReport(); // Generate an empty report for the new case
+            }
+
+            // Function to save the current report's data
+            function saveCurrentReport(promptForName = true) {
+                let reportName = '';
+                if (currentReportId) {
+                    const existingReport = reports.find(r => r.id === currentReportId);
+                    reportName = existingReport ? existingReport.name : `Case ${reports.length + 1} (${currentReportType.charAt(0).toUpperCase() + currentReportType.slice(1)})`;
+                }
+
+                if (promptForName) {
+                    reportName = prompt("Enter a name for this report:", reportName || `Case ${reports.length + 1} (${currentReportType.charAt(0).toUpperCase() + currentReportType.slice(1)})`);
+                    if (!reportName) {
+                        return; // User cancelled
+                    }
+                } else if (!currentReportId) {
+                    // If it's a new report being saved implicitly (e.g., on input change),
+                    // don't save if no name is provided yet.
+                    return;
+                }
+
+                const reportData = {
+                    id: currentReportId || Date.now().toString(),
+                    name: reportName,
+                    type: currentReportType, // Store the type of report (shoulder/knee)
+                    examDate: document.getElementById('examDate').value,
+                    bodyPartSide: getSelectedCheckboxes('bodyPartSide'),
+                    history: document.getElementById('history').value,
+                    impression: impressionOutput.value,
+                    radiologistName: document.getElementById('radiologistName').value,
+                    
+                    // Shoulder specific data
+                    shoulderData: {
+                        techniqueAxial: getSelectedCheckboxes('techniqueAxial'),
+                        techniqueAxialNotes: document.getElementById('techniqueAxialNotes').value,
+                        techniqueCoronal: getSelectedCheckboxes('techniqueCoronal'),
+                        techniqueCoronalNotes: document.getElementById('techniqueCoronalNotes').value,
+                        techniqueSagittal: getSelectedCheckboxes('techniqueSagittal'),
+                        techniqueSagittalNotes: document.getElementById('techniqueSagittalNotes').value,
+                        techniqueAcromion: getSelectedCheckboxes('techniqueAcromion'),
+                        techniqueAcromionNotes: document.getElementById('techniqueAcromionNotes').value,
+                        comparisonDateShoulder: document.getElementById('comparisonDateShoulder').value,
+                        supraspinatus: getSelectedCheckboxes('supraspinatus'),
+                        supraspinatusTearType: getSelectedCheckboxes('supraspinatusTearType'),
+                        supraspinatusNotes: document.getElementById('supraspinatusNotes').value,
+                        infraspinatus: getSelectedCheckboxes('infraspinatus'),
+                        infraspinatusTearType: getSelectedCheckboxes('infraspinatusTearType'),
+                        infraspinatusNotes: document.getElementById('infraspinatusNotes').value,
+                        subscapularis: getSelectedCheckboxes('subscapularis'),
+                        subscapularisTearType: getSelectedCheckboxes('subscapularisTearType'),
+                        subscapularisNotes: document.getElementById('subscapularisNotes').value,
+                        teresMinor: getSelectedCheckboxes('teresMinor'),
+                        teresMinorNotes: document.getElementById('teresMinorNotes').value,
+                        biceps: getSelectedCheckboxes('biceps'),
+                        bicepsNotes: document.getElementById('bicepsNotes').value,
+                        shoulderLabrum: getSelectedCheckboxes('shoulderLabrum'),
+                        shoulderLabrumNotes: document.getElementById('shoulderLabrumNotes').value,
+                        shoulderMusculature: getSelectedCheckboxes('shoulderMusculature'),
+                        fattyInfiltration: getSelectedCheckboxes('fattyInfiltration'),
+                        shoulderMusculatureNotes: document.getElementById('shoulderMusculatureNotes').value,
+                        shoulderGlenohumeral: getSelectedCheckboxes('shoulderGlenohumeral'),
+                        shoulderGlenohumeralNotes: document.getElementById('shoulderGlenohumeralNotes').value,
+                        shoulderACJoint: getSelectedCheckboxes('shoulderACJoint'),
+                        shoulderACJointNotes: document.getElementById('shoulderACJointNotes').value,
+                        shoulderOsseous: getSelectedCheckboxes('shoulderOsseous'),
+                        shoulderOsseousNotes: document.getElementById('shoulderOsseousNotes').value,
+                        shoulderBursae: getSelectedCheckboxes('shoulderBursae'),
+                        shoulderBursaeNotes: document.getElementById('shoulderBursaeNotes').value,
+                        shoulderNeurovascular: getSelectedCheckboxes('shoulderNeurovascular'),
+                        shoulderNeurovascularNotes: document.getElementById('shoulderNeurovascularNotes').value,
+                    },
+                    // Knee specific data
+                    kneeData: {
+                        kneeTechniqueAxial: getSelectedCheckboxes('kneeTechniqueAxial'),
+                        kneeTechniqueAxialNotes: document.getElementById('kneeTechniqueAxialNotes').value,
+                        kneeTechniqueSagittal: getSelectedCheckboxes('kneeTechniqueSagittal'),
+                        kneeTechniqueSagittalNotes: document.getElementById('kneeTechniqueSagittalNotes').value,
+                        kneeTechniqueCoronal: getSelectedCheckboxes('kneeTechniqueCoronal'),
+                        kneeTechniqueCoronalNotes: document.getElementById('kneeTechniqueCoronalNotes').value,
+                        kneeTechniqueObliqueACL: getSelectedCheckboxes('kneeTechniqueObliqueACL'),
+                        kneeTechniqueObliqueACLNotes: document.getElementById('kneeTechniqueObliqueACLNotes').value,
+                        kneeTechniqueObliquePerpACL: getSelectedCheckboxes('kneeTechniqueObliquePerpACL'),
+                        kneeTechniqueObliquePerpACLNotes: document.getElementById('kneeTechniqueObliquePerpACLNotes').value,
+                        comparisonDateKnee: document.getElementById('comparisonDateKnee').value,
+                        medialMeniscus: getSelectedCheckboxes('medialMeniscus'),
+                        medialMeniscusLocation: getSelectedCheckboxes('medialMeniscusLocation'),
+                        medialMeniscusZone: getSelectedCheckboxes('medialMeniscusZone'),
+                        medialMeniscusNotes: document.getElementById('medialMeniscusNotes').value,
+                        lateralMeniscus: getSelectedCheckboxes('lateralMeniscus'),
+                        lateralMeniscusLocation: getSelectedCheckboxes('lateralMeniscusLocation'),
+                        lateralMeniscusZone: getSelectedCheckboxes('lateralMeniscusZone'),
+                        lateralMeniscusNotes: document.getElementById('lateralMeniscusNotes').value,
+                        acl: getSelectedCheckboxes('acl'),
+                        aclNotes: document.getElementById('aclNotes').value,
+                        pcl: getSelectedCheckboxes('pcl'),
+                        pclNotes: document.getElementById('pclNotes').value,
+                        mcl: getSelectedCheckboxes('mcl'),
+                        mclNotes: document.getElementById('mclNotes').value,
+                        lcl: getSelectedCheckboxes('lcl'),
+                        lclNotes: document.getElementById('lclNotes').value,
+                        patellarTendon: getSelectedCheckboxes('patellarTendon'),
+                        patellarTendonNotes: document.getElementById('patellarTendonNotes').value,
+                        patellarRetinaculum: getSelectedCheckboxes('patellarRetinaculum'),
+                        patellarRetinaculumNotes: document.getElementById('patellarRetinaculumNotes').value,
+                        // New individual muscle/tendon data for knee
+                        overallMuscleStatus: document.querySelector('input[name="overallMuscleStatus"]:checked')?.value || '', // Save the selected status
+                        quadricepsTendon: getSelectedCheckboxes('quadricepsTendon'),
+                        quadricepsTendonNotes: document.getElementById('quadricepsTendonNotes').value,
+                        iliotibialBand: getSelectedCheckboxes('iliotibialBand'),
+                        iliotibialBandNotes: document.getElementById('iliotibialBandNotes').value,
+                        popliteusTendon: getSelectedCheckboxes('popliteusTendon'),
+                        popliteusTendonNotes: document.getElementById('popliteusTendonNotes').value,
+                        longHeadBicepsFemorisTendon: getSelectedCheckboxes('longHeadBicepsFemorisTendon'),
+                        longHeadBicepsFemorisTendonNotes: document.getElementById('longHeadBicepsFemorisTendonNotes').value,
+                        semitendinosus: getSelectedCheckboxes('semitendinosus'),
+                        semitendinosusNotes: document.getElementById('semitendinosusNotes').value,
+                        sartorius: getSelectedCheckboxes('sartorius'),
+                        sartoriusNotes: document.getElementById('sartoriusNotes').value,
+                        gracilis: getSelectedCheckboxes('gracilis'),
+                        gracilisNotes: document.getElementById('gracilisNotes').value,
+                        medialGastrocnemius: getSelectedCheckboxes('medialGastrocnemius'),
+                        medialGastrocnemiusNotes: document.getElementById('medialGastrocnemiusNotes').value,
+                        lateralGastrocnemius: getSelectedCheckboxes('lateralGastrocnemius'),
+                        lateralGastrocnemiusNotes: document.getElementById('lateralGastrocnemiusNotes').value,
+
+                        articularCartilage: getSelectedCheckboxes('articularCartilage'),
+                        articularCartilageNotes: document.getElementById('articularCartilageNotes').value,
+                        boneMarrow: getSelectedCheckboxes('boneMarrow'),
+                        boneMarrowNotes: document.getElementById('boneMarrowNotes').value,
+                        kneeEffusionBursae: getSelectedCheckboxes('kneeEffusionBursae'),
+                        kneeEffusionBursaeNotes: document.getElementById('kneeEffusionBursaeNotes').value,
+                        kneeOtherFindings: getSelectedCheckboxes('kneeOtherFindings'),
+                        kneeOtherFindingsNotes: document.getElementById('kneeOtherFindingsNotes').value,
+                    }
+                };
+
+                const existingIndex = reports.findIndex(r => r.id === reportData.id);
+                if (existingIndex > -1) {
+                    reports[existingIndex] = reportData; // Update existing
+                } else {
+                    reports.push(reportData); // Add new
+                    currentReportId = reportData.id; // Set as current if it's new
+                }
+                saveReportsToStorage();
+                renderReportList();
+            }
+
+            // Function to load a specific report into the form
+            function loadReport(reportId) {
+                undoState = captureFormState(); // Save current state for undo
+                const report = reports.find(r => r.id === reportId);
+                if (report) {
+                    currentReportId = reportId;
+                    switchTab(report.type); // Switch to the correct tab first
+
+                    document.getElementById('examDate').value = report.examDate;
+                    setCheckboxes('bodyPartSide', report.bodyPartSide);
+                    document.getElementById('history').value = report.history;
+                    document.getElementById('impression').value = report.impression || '';
+                    document.getElementById('radiologistName').value = report.radiologistName;
+                    
+                    // Clear all checkboxes and textareas in both shoulder and knee sections
+                    document.querySelectorAll('.report-form-section input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    document.querySelectorAll('.report-form-section textarea').forEach(textarea => {
+                        textarea.value = '';
+                    });
+                    document.querySelectorAll('.report-form-section input[type="date"]').forEach(input => {
+                        input.value = '';
+                    });
+
+                    // Load shoulder specific data
+                    if (report.shoulderData) {
+                        setCheckboxes('techniqueAxial', report.shoulderData.techniqueAxial);
+                        document.getElementById('techniqueAxialNotes').value = report.shoulderData.techniqueAxialNotes || '';
+                        setCheckboxes('techniqueCoronal', report.shoulderData.techniqueCoronal);
+                        document.getElementById('techniqueCoronalNotes').value = report.shoulderData.techniqueCoronalNotes || '';
+                        setCheckboxes('techniqueSagittal', report.shoulderData.techniqueSagittal);
+                        document.getElementById('techniqueSagittalNotes').value = report.shoulderData.techniqueSagittalNotes || '';
+                        setCheckboxes('techniqueAcromion', report.shoulderData.techniqueAcromion);
+                        document.getElementById('techniqueAcromionNotes').value = report.shoulderData.techniqueAcromionNotes || '';
+                        document.getElementById('comparisonDateShoulder').value = report.shoulderData.comparisonDateShoulder || '';
+                        setCheckboxes('supraspinatus', report.shoulderData.supraspinatus);
+                        setCheckboxes('supraspinatusTearType', report.shoulderData.supraspinatusTearType);
+                        document.getElementById('supraspinatusNotes').value = report.shoulderData.supraspinatusNotes;
+                        setCheckboxes('infraspinatus', report.shoulderData.infraspinatus);
+                        setCheckboxes('infraspinatusTearType', report.shoulderData.infraspinatusTearType);
+                        document.getElementById('infraspinatusNotes').value = report.shoulderData.infraspinatusNotes;
+                        setCheckboxes('subscapularis', report.shoulderData.subscapularis);
+                        setCheckboxes('subscapularisTearType', report.shoulderData.subscapularisTearType);
+                        document.getElementById('subscapularisNotes').value = report.shoulderData.subscapularisNotes;
+                        setCheckboxes('teresMinor', report.shoulderData.teresMinor);
+                        document.getElementById('teresMinorNotes').value = report.shoulderData.teresMinorNotes;
+                        setCheckboxes('biceps', report.shoulderData.biceps);
+                        document.getElementById('bicepsNotes').value = report.shoulderData.bicepsNotes;
+                        setCheckboxes('shoulderLabrum', report.shoulderData.shoulderLabrum);
+                        document.getElementById('shoulderLabrumNotes').value = report.shoulderData.shoulderLabrumNotes;
+                        setCheckboxes('shoulderMusculature', report.shoulderData.shoulderMusculature);
+                        setCheckboxes('fattyInfiltration', report.shoulderData.fattyInfiltration);
+                        document.getElementById('shoulderMusculatureNotes').value = report.shoulderData.shoulderMusculatureNotes;
+                        setCheckboxes('shoulderGlenohumeral', report.shoulderData.shoulderGlenohumeral);
+                        document.getElementById('shoulderGlenohumeralNotes').value = report.shoulderData.shoulderGlenohumeralNotes;
+                        setCheckboxes('shoulderACJoint', report.shoulderData.shoulderACJoint);
+                        document.getElementById('shoulderACJointNotes').value = report.shoulderData.shoulderACJointNotes;
+                        setCheckboxes('shoulderOsseous', report.shoulderData.shoulderOsseous);
+                        document.getElementById('shoulderOsseousNotes').value = report.shoulderData.shoulderOsseousNotes;
+                        setCheckboxes('shoulderBursae', report.shoulderData.shoulderBursae);
+                        document.getElementById('shoulderBursaeNotes').value = report.shoulderData.shoulderBursaeNotes;
+                        setCheckboxes('shoulderNeurovascular', report.shoulderData.shoulderNeurovascular);
+                        document.getElementById('shoulderNeurovascularNotes').value = report.shoulderData.shoulderNeurovascularNotes;
+                    }
+
+                    // Load knee specific data
+                    if (report.kneeData) {
+                        setCheckboxes('kneeTechniqueAxial', report.kneeData.kneeTechniqueAxial);
+                        document.getElementById('kneeTechniqueAxialNotes').value = report.kneeData.kneeTechniqueAxialNotes || '';
+                        setCheckboxes('kneeTechniqueSagittal', report.kneeData.kneeTechniqueSagittal);
+                        document.getElementById('kneeTechniqueSagittalNotes').value = report.kneeData.kneeTechniqueSagittalNotes || '';
+                        setCheckboxes('kneeTechniqueCoronal', report.kneeData.kneeTechniqueCoronal);
+                        document.getElementById('kneeTechniqueCoronalNotes').value = report.kneeData.kneeTechniqueCoronalNotes || '';
+                        setCheckboxes('kneeTechniqueObliqueACL', report.kneeData.kneeTechniqueObliqueACL);
+                        document.getElementById('kneeTechniqueObliqueACLNotes').value = report.kneeData.kneeTechniqueObliqueACLNotes || '';
+                        setCheckboxes('kneeTechniqueObliquePerpACL', report.kneeData.kneeTechniqueObliquePerpACL);
+                        document.getElementById('kneeTechniqueObliquePerpACLNotes').value = report.kneeData.kneeTechniqueObliquePerpACLNotes || '';
+                        document.getElementById('comparisonDateKnee').value = report.kneeData.comparisonDateKnee || '';
+                        setCheckboxes('medialMeniscus', report.kneeData.medialMeniscus);
+                        setCheckboxes('medialMeniscusLocation', report.kneeData.medialMeniscusLocation);
+                        setCheckboxes('medialMeniscusZone', report.kneeData.medialMeniscusZone);
+                        document.getElementById('medialMeniscusNotes').value = report.kneeData.medialMeniscusNotes;
+                        setCheckboxes('lateralMeniscus', report.kneeData.lateralMeniscus);
+                        setCheckboxes('lateralMeniscusLocation', report.kneeData.lateralMeniscusLocation);
+                        setCheckboxes('lateralMeniscusZone', report.kneeData.lateralMeniscusZone);
+                        document.getElementById('lateralMeniscusNotes').value = report.kneeData.lateralMeniscusNotes;
+                        setCheckboxes('acl', report.kneeData.acl);
+                        document.getElementById('aclNotes').value = report.kneeData.aclNotes;
+                        setCheckboxes('pcl', report.kneeData.pcl);
+                        document.getElementById('pclNotes').value = report.kneeData.pclNotes;
+                        setCheckboxes('mcl', report.kneeData.mcl);
+                        document.getElementById('mclNotes').value = report.kneeData.mclNotes;
+                        setCheckboxes('lcl', report.kneeData.lcl);
+                        document.getElementById('lclNotes').value = report.kneeData.lclNotes;
+                        setCheckboxes('patellarTendon', report.kneeData.patellarTendon);
+                        document.getElementById('patellarTendonNotes').value = report.kneeData.patellarTendonNotes;
+                        setCheckboxes('patellarRetinaculum', report.kneeData.patellarRetinaculum);
+                        document.getElementById('patellarRetinaculumNotes').value = report.kneeData.patellarRetinaculumNotes;
+                        
+                        if (report.kneeData.overallMuscleStatus === 'Normal') {
+                            document.getElementById('overallMuscleStatusNormal').checked = true;
+                            individualMuscleFindingsDiv.classList.add('hidden');
+                        } else if (report.kneeData.overallMuscleStatus === 'Abnormal') {
+                            document.getElementById('overallMuscleStatusAbnormal').checked = true;
+                            individualMuscleFindingsDiv.classList.remove('hidden');
+                        } else {
+                            // No status saved or cleared, hide by default
+                            document.getElementById('overallMuscleStatusNormal').checked = false;
+                            document.getElementById('overallMuscleStatusAbnormal').checked = false;
+                            individualMuscleFindingsDiv.classList.add('hidden');
+                        }
+                        setCheckboxes('quadricepsTendon', report.kneeData.quadricepsTendon || []);
+                        document.getElementById('quadricepsTendonNotes').value = report.kneeData.quadricepsTendonNotes || '';
+                        setCheckboxes('iliotibialBand', report.kneeData.iliotibialBand || []);
+                        document.getElementById('iliotibialBandNotes').value = report.kneeData.iliotibialBandNotes || '';
+                        setCheckboxes('popliteusTendon', report.kneeData.popliteusTendon || []);
+                        document.getElementById('popliteusTendonNotes').value = report.kneeData.popliteusTendonNotes || '';
+                        setCheckboxes('longHeadBicepsFemorisTendon', report.kneeData.longHeadBicepsFemorisTendon || []);
+                        document.getElementById('longHeadBicepsFemorisTendonNotes').value = report.kneeData.longHeadBicepsFemorisTendonNotes || '';
+                        setCheckboxes('semitendinosus', report.kneeData.semitendinosus || []);
+                        document.getElementById('semitendinosusNotes').value = report.kneeData.semitendinosusNotes || '';
+                        setCheckboxes('sartorius', report.kneeData.sartorius || []);
+                        document.getElementById('sartoriusNotes').value = state.kneeData.sartoriusNotes || '';
+                        setCheckboxes('gracilis', state.kneeData.gracilis || []);
+                        document.getElementById('gracilisNotes').value = state.kneeData.gracilisNotes || '';
+                        setCheckboxes('medialGastrocnemius', state.kneeData.medialGastrocnemius || []);
+                        document.getElementById('medialGastrocnemiusNotes').value = state.kneeData.medialGastrocnemiusNotes || '';
+                        setCheckboxes('lateralGastrocnemius', state.kneeData.lateralGastrocnemius || []);
+                        document.getElementById('lateralGastrocnemiusNotes').value = state.kneeData.lateralGastrocnemiusNotes || '';
+
+                        setCheckboxes('articularCartilage', report.kneeData.articularCartilage);
+                        document.getElementById('articularCartilageNotes').value = report.kneeData.articularCartilageNotes;
+                        setCheckboxes('boneMarrow', report.kneeData.boneMarrow);
+                        document.getElementById('boneMarrowNotes').value = report.kneeData.boneMarrowNotes;
+                        setCheckboxes('kneeEffusionBursae', report.kneeData.kneeEffusionBursae);
+                        document.getElementById('kneeEffusionBursaeNotes').value = report.kneeData.kneeEffusionBursaeNotes;
+                        setCheckboxes('kneeOtherFindings', report.kneeData.kneeOtherFindings);
+                        document.getElementById('kneeOtherFindingsNotes').value = report.kneeData.kneeOtherFindingsNotes;
+                    }
+
+                    generateReport(); // Regenerate report output based on loaded data
+                    renderReportList(); // Update active button
+                }
+            }
+
+            // Function to delete a report
+            function deleteReport() {
+                if (currentReportId && confirm("Are you sure you want to delete this report?")) {
+                    reports = reports.filter(r => r.id !== currentReportId);
+                    saveReportsToStorage();
+                    clearForm(); // Clear the form after deleting
+                    renderReportList();
+                } else if (!currentReportId) {
+                    showCustomAlert("No report is currently loaded to delete.");
+                }
+            }
+
+            // Function to render the list of saved reports
+            function renderReportList() {
+                caseListDiv.innerHTML = ''; // Clear existing list
+                if (reports.length === 0) {
+                    caseListDiv.innerHTML = '<p class="text-sm text-gray-500">No saved reports yet.</p>';
+                } else {
+                    reports.forEach(report => {
+                        const button = document.createElement('button');
+                        button.textContent = report.name;
+                        button.classList.add('case-button');
+                        if (report.id === currentReportId) {
+                            button.classList.add('active');
+                        }
+                        button.addEventListener('click', () => loadReport(report.id));
+                        caseListDiv.appendChild(button);
+                    });
+                }
+            }
+
+            // Load reports from local storage
+            function loadReportsFromStorage() {
+                const storedReports = localStorage.getItem('mskMultiBodypartReports');
+                if (storedReports) {
+                    try {
+                        reports = JSON.parse(storedReports);
+                        if (reports.length > 0) {
+                            // Load the first report by default if any exist
+                            loadReport(reports[0].id);
+                        } else {
+                            clearForm();
+                            generateReport();
+                        }
+                    } catch (e) {
+                        console.error("Error parsing stored reports from localStorage:", e);
+                        // If parsing fails, treat as no stored reports and clear the form
+                        clearForm();
+                        generateReport();
+                        showCustomAlert("Corrupted saved data detected. Starting with a fresh report.");
+                    }
+                } else {
+                    clearForm();
+                    generateReport();
+                }
+                renderReportList();
+            }
+
+            // Save reports to local storage
+            function saveReportsToStorage() {
+                localStorage.setItem('mskMultiBodypartReports', JSON.stringify(reports));
+            }
+
+            // Custom Alert/Modal functions
+            function showCustomAlert(message) {
+                const customAlert = document.getElementById('customAlert');
+                const customAlertMessage = document.getElementById('customAlertMessage');
+                const customAlertCloseBtn = document.getElementById('customAlertCloseBtn');
+
+                if (!customAlert || !customAlertMessage || !customAlertCloseBtn) {
+                    // Fallback if elements are not found, though they should always be present
+                    console.error('Custom alert elements not found!');
+                    return;
+                }
+
+                customAlertMessage.textContent = message;
+                // Explicitly set display to flex and remove hidden class
+                customAlert.style.display = 'flex';
+                customAlert.classList.remove('hidden');
+
+                customAlertCloseBtn.onclick = () => {
+                    // Explicitly set display to none and add hidden class
+                    customAlert.style.display = 'none';
+                    customAlert.classList.add('hidden');
+                };
+            }
+
+            // Event Listeners for new buttons
+            saveReportBtn.addEventListener('click', () => saveCurrentReport(true)); // Prompt for name on explicit save
+            newReportBtn.addEventListener('click', newReport);
+            deleteReportBtn.addEventListener('click', deleteReport);
+            generateReportBtn.addEventListener('click', generateReport); // Keep this for manual trigger
+            clearFormBtn.addEventListener('click', clearForm); // Keep this for clearing all fields
+            undoBtn.addEventListener('click', () => { // Undo button functionality
+                if (undoState) {
+                    restoreFormState(undoState);
+                    undoState = null; // Clear undo state after restoring
+                    showCustomAlert('Last action undone.');
+                } else {
+                    showCustomAlert('Nothing to undo.');
+                }
+            });
+
+
+            // Copy to clipboard functionality
+            copyReportBtn.addEventListener('click', () => {
+                const textToCopy = reportOutput.textContent;
+                const textarea = document.createElement('textarea');
+                textarea.value = textToCopy;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showCustomAlert('Report copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    showCustomAlert('Failed to copy report.');
+                }
+                document.body.removeChild(textarea);
+            });
+
+            // Initial load of reports when the page loads
+            loadReportsFromStorage();
+            switchTab('shoulder'); // Ensure shoulder tab is active on initial load
+            // Ensure initial state of muscle findings is hidden
+            individualMuscleFindingsDiv.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
