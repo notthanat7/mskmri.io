@@ -371,7 +371,7 @@
                             <h4 class="text-md font-medium text-gray-700 mb-2">Sagittal oblique</h4>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" name="techniqueSagittal" value="T2W/FS"> T2W/FS</label>
-                                <label><input type="checkbox" name="techniqueSagittal" value="PDW"> PDW</label>
+                                <label><input type="checkbox" name="checkbox" name="techniqueSagittal" value="PDW"> PDW</label>
                             </div>
                             <label for="techniqueSagittalNotes" class="block text-sm font-medium text-gray-700 mt-2 mb-1">Others:</label>
                             <textarea id="techniqueSagittalNotes" rows="2"></textarea>
@@ -1219,15 +1219,14 @@
                 generateReport(); // Regenerate report for the new tab
             }
 
-            // Helper function to format findings for the main report output (includes normal findings)
-            function formatReportFindingLine(title, checkboxesName, notesId, ...additionalCheckboxNames) {
+            // Helper function to format findings for the main report output
+            // It now takes the specific structure name (e.g., "Supraspinatus Tendon") as the first argument.
+            function formatReportFindingLine(specificStructureName, checkboxesName, notesId, ...additionalCheckboxNames) {
                 let findings = getSelectedCheckboxes(checkboxesName);
                 if (additionalCheckboxNames.length > 0) {
                     additionalCheckboxNames.forEach(extraName => {
                         const extraFindings = getSelectedCheckboxes(extraName);
                         if (extraFindings.length > 0) {
-                            // Append or integrate based on context. For now, just join.
-                            // This might need more sophisticated logic for specific combinations.
                             findings = findings.concat(extraFindings);
                         }
                     });
@@ -1236,13 +1235,18 @@
                 const additionalNotes = document.getElementById(notesId).value.trim();
                 
                 if (findings.length > 0 || additionalNotes) {
-                    let content = `- ${title.trim()}: ${findings.join(', ')}`;
+                    let content = findings.join(', ');
                     if (additionalNotes) {
-                        content += ` ${additionalNotes}`;
+                        if (content) { // Add space only if there are findings
+                            content += ` ${additionalNotes}`;
+                        } else { // If no findings, just the notes
+                            content = additionalNotes;
+                        }
                     }
-                    return content;
+                    // Prepend the specific structure name to the content
+                    return `- ${specificStructureName}: ${content}`;
                 }
-                return '';
+                return ''; // Return empty string if no findings or notes
             }
 
             // New logic for overallMuscleStatus radio buttons
@@ -1427,7 +1431,8 @@
                 report += `HISTORY:\n${history || ''}\n\n`;
 
                 // 2. Technique Section (Dynamic based on currentReportType)
-                report += 'TECHNIQUE:\n\n';
+                // Modified: Changed the introductory line for TECHNIQUE section
+                report += `TECHNIQUE:\nRoutine MRI of the ${bodyPart} was done according to standard protocol.\n\n`;
                 if (currentReportType === 'shoulder') {
                     const techniqueAxial = getSelectedCheckboxes('techniqueAxial');
                     const techniqueAxialNotes = document.getElementById('techniqueAxialNotes').value.trim();
@@ -1447,7 +1452,7 @@
                         techniqueCoronal.length === 0 && techniqueCoronalNotes === '' &&
                         techniqueSagittal.length === 0 && techniqueSagittalNotes === '' &&
                         techniqueAcromion.length === 0 && techniqueAcromionNotes === '') {
-                        report += 'No specific technique details selected for Shoulder.\n';
+                        // Removed "No specific technique details selected for Shoulder." as it's now covered by the new intro
                     }
                 } else if (currentReportType === 'knee') {
                     const kneeTechniqueAxial = getSelectedCheckboxes('kneeTechniqueAxial');
@@ -1474,7 +1479,7 @@
                         kneeTechniqueSagittal.length === 0 && kneeTechniqueSagittalNotes === '' &&
                         kneeTechniqueObliqueACL.length === 0 && kneeTechniqueObliqueACLNotes === '' &&
                         kneeTechniqueObliquePerpACL.length === 0 && kneeTechniqueObliquePerpACLNotes === '') {
-                        report += 'No specific technique details selected for Knee.\n';
+                        // Removed "No specific technique details selected for Knee." as it's now covered by the new intro
                     }
                 }
                 report += '\n';
@@ -1522,7 +1527,7 @@
 
                     // Glenoid Labrum
                     report += '#GLENOID LABRUM:\n';
-                    let labrumLine = formatReportFindingLine('GLENOID LABRUM', 'shoulderLabrum', 'shoulderLabrumNotes');
+                    let labrumLine = formatReportFindingLine('Glenoid Labrum', 'shoulderLabrum', 'shoulderLabrumNotes');
                     if (labrumLine) report += `${labrumLine}\n\n`;
                     else report += '\n';
 
@@ -1536,7 +1541,7 @@
                         if (musculatureReportFindings.length > 0) combinedMusculature.push(...musculatureReportFindings);
                         if (fattyInfiltrationReport.length > 0) combinedMusculature.push(`Fatty Infiltration: ${fattyInfiltrationReport.join(', ')}`);
                         
-                        let item = `- MUSCULATURE: ${combinedMusculature.join(', ')}`;
+                        let item = `- Musculature: ${combinedMusculature.join(', ')}`;
                         if (musculatureReportNotes) item += ` ${musculatureReportNotes}`;
                         report += `${item}\n\n`;
                     } else {
@@ -1545,31 +1550,31 @@
 
                     // Glenohumeral Joint and Capsulo-Labral Structure
                     report += '#GLENOHUMERAL JOINT AND CAPSULO-LABRAL STRUCTURE:\n';
-                    let glenohumeralLine = formatReportFindingLine('GLENOHUMERAL JOINT AND CAPSULO-LABRAL STRUCTURE', 'shoulderGlenohumeral', 'shoulderGlenohumeralNotes');
+                    let glenohumeralLine = formatReportFindingLine('Glenohumeral Joint', 'shoulderGlenohumeral', 'shoulderGlenohumeralNotes');
                     if (glenohumeralLine) report += `${glenohumeralLine}\n\n`;
                     else report += '\n';
 
                     // ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS
                     report += '#ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS:\n';
-                    let acJointLine = formatReportFindingLine('ACROMIOCLAVICULAR JOINT AND RELATED LIGAMENTS', 'shoulderACJoint', 'shoulderACJointNotes');
+                    let acJointLine = formatReportFindingLine('ACROMIOCLAVICULAR JOINT', 'shoulderACJoint', 'shoulderACJointNotes');
                     if (acJointLine) report += `${acJointLine}\n\n`;
                     else report += '\n';
 
                     // OTHER OSSEOUS STRUCTURES
                     report += '#OTHER OSSEOUS STRUCTURES:\n';
-                    let osseousLine = formatReportFindingLine('OTHER OSSEOUS STRUCTURES', 'shoulderOsseous', 'shoulderOsseousNotes');
+                    let osseousLine = formatReportFindingLine('Osseous Structures', 'shoulderOsseous', 'shoulderOsseousNotes');
                     if (osseousLine) report += `${osseousLine}\n\n`;
                     else report += '\n';
 
                     // BURSAE
                     report += '#BURSAE:\n';
-                    let bursaeLine = formatReportFindingLine('BURSAE', 'shoulderBursae', 'shoulderBursaeNotes');
+                    let bursaeLine = formatReportFindingLine('Bursae', 'shoulderBursae', 'shoulderBursaeNotes');
                     if (bursaeLine) report += `${bursaeLine}\n\n`;
                     else report += '\n';
 
                     // NEUROVASCULAR BUNDLES
                     report += '#NEUROVASCULAR BUNDLES:\n';
-                    let neurovascularLine = formatReportFindingLine('NEUROVASCULAR BUNDLES', 'shoulderNeurovascular', 'shoulderNeurovascularNotes');
+                    let neurovascularLine = formatReportFindingLine('Neurovascular Bundles', 'shoulderNeurovascular', 'shoulderNeurovascularNotes');
                     if (neurovascularLine) report += `${neurovascularLine}\n\n`;
                     else report += '\n';
 
@@ -1625,24 +1630,26 @@
 
                     // Extensor Mechanism
                     const patellarTendonFindings = getSelectedCheckboxes('patellarTendon');
-                    if (patellarTendonFindings.length > 0) {
-                        patellarTendonFindings.forEach(finding => {
-                            report += `- Patellar Tendon: ${finding}\n`;
-                        });
-                    }
                     const patellarTendonNotes = document.getElementById('patellarTendonNotes').value.trim();
-                    if (patellarTendonNotes) report += `${patellarTendonNotes}\n`;
-
                     const patellarRetinaculumFindings = getSelectedCheckboxes('patellarRetinaculum');
-                    if (patellarRetinaculumFindings.length > 0) {
-                        patellarRetinaculumFindings.forEach(finding => {
-                            report += `- Patellar Retinaculum / Medial Patellofemoral Ligament (MPFL): ${finding}\n`;
-                        });
-                    }
                     const patellarRetinaculumNotes = document.getElementById('patellarRetinaculumNotes').value.trim();
-                    if (patellarRetinaculumNotes) report += `${patellarRetinaculumNotes}\n`;
-                    
-                    report += '\n';
+
+                    const shouldShowExtensorMechanismSection =
+                        (patellarTendonFindings.length > 0 || patellarTendonNotes) ||
+                        (patellarRetinaculumFindings.length > 0 || patellarRetinaculumNotes);
+
+                    if (shouldShowExtensorMechanismSection) {
+                        report += `#EXTENSOR MECHANISM:\n`;
+                        if (patellarTendonFindings.length > 0 || patellarTendonNotes) {
+                            report += `- Patellar Tendon: ${patellarTendonFindings.join(', ')}${patellarTendonNotes ? ` ${patellarTendonNotes}` : ''}\n`;
+                        }
+                        if (patellarRetinaculumFindings.length > 0 || patellarRetinaculumNotes) {
+                            report += `- Patellar Retinaculum / Medial Patellofemoral Ligament (MPFL): ${patellarRetinaculumFindings.join(', ')}${patellarRetinaculumNotes ? ` ${patellarRetinaculumNotes}` : ''}\n`;
+                        }
+                        report += '\n';
+                    } else {
+                        report += '\n';
+                    }
 
                     // Other Muscles and Tendons (Updated Logic)
                     const overallMuscleStatus = document.querySelector('input[name="overallMuscleStatus"]:checked')?.value;
@@ -1680,33 +1687,19 @@
 
                             // Grouped muscles: Semitendinosus, Sartorius, Gracilis, Medial/Lateral Gastrocnemius
                             const specificMuscles = [
-                                { name: 'semitendinosus', label: 'Semitendinosus', default: 'Unremarkable' },
-                                { name: 'sartorius', label: 'Sartorius', default: 'Unremarkable' },
-                                { name: 'gracilis', label: 'Gracilis', default: 'Unremarkable' },
-                                { name: 'medialGastrocnemius', label: 'Medial head of gastrocnemius', default: 'Unremarkable' },
-                                { name: 'lateralGastrocnemius', label: 'Lateral head of gastrocnemius', default: 'Unremarkable' }
+                                { name: 'semitendinosus', label: 'Semitendinosus Muscle/Tendon', default: 'Unremarkable' },
+                                { name: 'sartorius', label: 'Sartorius Muscle', default: 'Unremarkable' },
+                                { name: 'gracilis', label: 'Gracilis Muscle', default: 'Unremarkable' },
+                                { name: 'medialGastrocnemius', label: 'Medial Head of Gastrocnemius Muscle', default: 'Unremarkable' },
+                                { name: 'lateralGastrocnemius', label: 'Lateral Head of Gastrocnemius Muscle', default: 'Unremarkable' }
                             ];
-
-                            let allSpecificMusclesUnremarkable = true;
-                            let individualMuscleLines = [];
 
                             specificMuscles.forEach(muscle => {
                                 const findings = getSelectedCheckboxes(muscle.name);
                                 const notes = document.getElementById(`${muscle.name}Notes`).value.trim();
-
-                                if (findings.length > 1 || (findings.length === 1 && findings[0] !== muscle.default) || notes) {
-                                    allSpecificMusclesUnremarkable = false;
-                                }
-                                individualMuscleLines.push(`- ${muscle.label}: ${findings.length > 0 ? findings.join(', ') : muscle.default + '.'}${notes ? ` ${notes}` : ''}`);
+                                const lineContent = findings.length > 0 ? findings.join(', ') : muscle.default;
+                                report += `- ${muscle.label}: ${lineContent}${notes ? ` ${notes}` : ''}\n`;
                             });
-
-                            if (allSpecificMusclesUnremarkable) {
-                                report += `- Semitendinosus, sartorius, gracilis, medial and lateral head of gastrocnemius muscles: Unremarkable.\n`;
-                            } else {
-                                individualMuscleLines.forEach(line => {
-                                    report += `${line}\n`;
-                                });
-                            }
                         }
                         report += '\n'; // Add a newline after the muscle/tendon section if it appears
                     }
@@ -1721,14 +1714,14 @@
 
                     // Joint Effusion / Bursae - Knee
                     report += '#JOINT EFFUSION / BURSAE:\n';
-                    let kneeEffusionBursaeLine = formatReportFindingLine('JOINT EFFUSION / BURSAE', 'kneeEffusionBursae', 'kneeEffusionBursaeNotes');
+                    let kneeEffusionBursaeLine = formatReportFindingLine('Joint Effusion / Bursae', 'kneeEffusionBursae', 'kneeEffusionBursaeNotes');
                     if (kneeEffusionBursaeLine) report += `${kneeEffusionBursaeLine}\n\n`;
                     else report += '\n';
 
                     // Other Findings - Knee
                     report += '#OTHERS:\n';
-                    let kneeOtherFindingsLine = formatReportFindingLine('', 'kneeOtherFindings', 'kneeOtherFindingsNotes');
-                    if (kneeOtherFindingsLine) report += `${kneeOtherFindingsLine.replace('- : ', '- ')}\n\n`; // Remove the empty title and colon
+                    let kneeOtherFindingsLine = formatReportFindingLine('Other Findings', 'kneeOtherFindings', 'kneeOtherFindingsNotes');
+                    if (kneeOtherFindingsLine) report += `${kneeOtherFindingsLine}\n\n`;
                     else report += '\n';
                 }
 
